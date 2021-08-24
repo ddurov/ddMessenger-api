@@ -1,0 +1,6 @@
+{
+    "require": {
+        "krugozor/database": "^2.0",
+        "phpmailer/phpmailer": "^6.4"
+    }
+}
