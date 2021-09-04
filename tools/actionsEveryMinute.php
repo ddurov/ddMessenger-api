@@ -4,7 +4,7 @@ require_once "vendor/autoload.php";
 
 use Krugozor\Database\Mysql;
 
-$db = Mysql::create("localhost", "root", "DDurov1ater!")->setDatabaseName("eviger")->setCharset("utf8mb4");
+$db = Mysql::create("localhost", "user", "password")->setDatabaseName("eviger")->setCharset("utf8mb4");
 
 if ($argv[1] == "resetSessionAuth") {
 
