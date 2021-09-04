@@ -21,52 +21,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 if (isset($data['text'])) {
 
-                    (new Messages)->send($data['to_id'], $data['text'], $data['token']);
+                    Messages::send($data['to_id'], $data['text'], $data['token']);
 
                 } else {
 
-                    die((new Other)->generateJson(["response" => ["error" => "text not setted"]]));
+                    die(Other::generateJson(["response" => ["error" => "text not setted"]]));
 
                 }
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "to_id not setted"]]));
+                die(Other::generateJson(["response" => ["error" => "to_id not setted"]]));
 
             }
 
         break;
         default:
-            die((new Other)->generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
+            die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
 
     }
 
 } else {
 
-    (new Other)->checkToken($_GET['token']);
+    Other::checkToken($_GET['token']);
     
     switch ($_GET['method']) {
 
         case 'getDialogs':
 
-            (new Messages)->getDialogs($_GET['token']);
+            Messages::getDialogs($_GET['token']);
 
         break;
         case 'getHistory':
 
             if (isset($_GET['id'])) {
 
-                (new Messages)->getHistory($_GET['id'], $_GET['token']);
+                Messages::getHistory($_GET['id'], $_GET['token']);
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "id not setted"]]));
+                die(Other::generateJson(["response" => ["error" => "id not setted"]]));
 
             }
 
         break;
         default:
-            die((new Other)->generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
+            die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
 
     }
 

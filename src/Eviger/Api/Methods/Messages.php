@@ -8,10 +8,13 @@ use Krugozor\Database\MySqlException;
 
 class Messages
 {
+
     /**
-     * @throws MySqlException
+     * @param string $toId
+     * @param string $text
+     * @param string $token
      */
-    public function send(string $toId, string $text, string $token) {
+    public static function send(string $toId, string $text, string $token) {
 
         if (is_numeric($toId)) {
 
@@ -21,7 +24,7 @@ class Messages
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "to_id incorrect"]]));
+                die(Other::generateJson(["response" => ["error" => "to_id incorrect"]]));
 
             }
 
@@ -33,7 +36,7 @@ class Messages
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "to_id incorrect"]]));
+                die(Other::generateJson(["response" => ["error" => "to_id incorrect"]]));
 
             }
 
@@ -55,7 +58,7 @@ class Messages
 
             Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', ?i, ?i, ?i, '?s', ?i)", $peers, $local_id_message, $myId, $to_id, (new Other())->encryptMessage($text), $time);
 
-            die((new Other)->generateJson(["response" => ["id" => (int)$local_id_message]]));
+            die(Other::generateJson(["response" => ["id" => (int)$local_id_message]]));
 
         } else {
 
@@ -63,12 +66,17 @@ class Messages
 
             Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', 1, ?i, ?i, '?s', ?i)", $myId.",".$to_id, $myId, $to_id, (new Other())->encryptMessage($text), $time);
 
-            die((new Other)->generateJson(["response" => ["id" => 1]]));
+            die(Other::generateJson(["response" => ["id" => 1]]));
 
         }
 
     }
-    public function getHistory($id, $token){
+
+    /**
+     * @param $id
+     * @param $token
+     */
+    public static function getHistory($id, $token){
 
         if (is_numeric($id)) {
 
@@ -78,7 +86,7 @@ class Messages
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "id incorrect"]]));
+                die(Other::generateJson(["response" => ["error" => "id incorrect"]]));
 
             }
 
@@ -90,7 +98,7 @@ class Messages
 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "id incorrect"]]));
+                die(Other::generateJson(["response" => ["error" => "id incorrect"]]));
 
             }
 
@@ -106,14 +114,18 @@ class Messages
 
         while ($data_parsed = $data->fetchAssoc()) {
 
-            $dataArray[] = ["id" => (int)$data_parsed['local_id_message'], "out" => $data_parsed['out_id'] == Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'], "message" => (new Other)->decryptMessage($data_parsed['message']), "date" => (int)$data_parsed['date']];
+            $dataArray[] = ["id" => (int)$data_parsed['local_id_message'], "out" => $data_parsed['out_id'] == Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'], "message" => Other::decryptMessage($data_parsed['message']), "date" => (int)$data_parsed['date']];
 
         }
 
-        die((new Other)->generateJson(["response" => $dataArray]));
+        die(Other::generateJson(["response" => $dataArray]));
 
     }
-    public function getDialogs(string $token) {
+
+    /**
+     * @param string $token
+     */
+    public static function getDialogs(string $token) {
 
         $dataArray = [];
         $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE peers LIKE '%?S%' ORDER BY last_message_date DESC", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
@@ -124,7 +136,8 @@ class Messages
 
         }
 
-        die((new Other)->generateJson(["response" => $dataArray]));
+        die(Other::generateJson(["response" => $dataArray]));
 
     }
+
 }

@@ -13,7 +13,7 @@ class Other
      * @param array $array
      * @return false|string
      */
-    public function generateJson(array $array): string {
+    public static function generateJson(array $array): string {
         return json_encode($array, JSON_UNESCAPED_UNICODE);
     }
 
@@ -21,7 +21,7 @@ class Other
      * @param string $message
      * @return string
      */
-    public function encryptMessage(string $message): string {
+    public static function encryptMessage(string $message): string {
         Dotenv::createImmutable("/var/www/tools")->load();
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
         $iv = openssl_random_pseudo_bytes($ivlen);
@@ -34,7 +34,7 @@ class Other
      * @param string $messageEncoded
      * @return string
      */
-    public function decryptMessage(string $messageEncoded): string {
+    public static function decryptMessage(string $messageEncoded): string {
         Dotenv::createImmutable("/var/www/tools")->load();
         $c = base64_decode($messageEncoded);
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
@@ -47,7 +47,7 @@ class Other
      * @param string $token
      * @throws MySqlException
      */
-    public function checkToken(string $token) {
+    public static function checkToken(string $token) {
 
         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) {
 
@@ -97,7 +97,7 @@ class Other
     /**
      * @throws MySqlException
      */
-    public function checkAdmin(string $token) {
+    public static function checkAdmin(string $token) {
 
         if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] == 1) {
 

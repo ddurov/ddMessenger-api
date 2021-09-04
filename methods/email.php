@@ -27,11 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if (isset($data['email'])) {
 
-                (new Email)->createCode($data['email'], $mail);
+                Email::createCode($data['email'], $mail);
                 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "email not setted"]]));
+                die(Other::generateJson(["response" => ["error" => "email not setted"]]));
                 
             }
 
@@ -42,23 +42,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
                 if (isset($data['code'])) {
 
-                    (new Email)->confirmCode($data['email'], $data['code'], $data['hash']);
+                    Email::confirmCode($data['email'], $data['code'], $data['hash']);
                     
                 } else {
 
-                    die((new Other)->generateJson(["response" => ["error" => "code not setted"]]));
+                    die(Other::generateJson(["response" => ["error" => "code not setted"]]));
                     
                 }
                 
             } else {
 
-                die((new Other)->generateJson(["response" => ["error" => "email not setted"]]));
+                die(Other::generateJson(["response" => ["error" => "email not setted"]]));
                 
             }
 
         break;
     	default:
-            die((new Other)->generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
+            die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
 
     }
 
@@ -67,10 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     switch ($_GET['method']) {
 
     	default:
-
-            echo sendJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]);
-            
-        break;
+            die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
 
     }
 
