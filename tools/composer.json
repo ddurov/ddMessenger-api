@@ -1,6 +1,25 @@
 {
+    "name": "eviger/api",
+    "autoload": {
+        "psr-4": {
+            "Eviger\\": "../src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "labile",
+            "email": "1a6i1e@gmail.com"
+        },
+        {
+            "name": "ddurov",
+            "email": "admin@eviger.ru"
+        }
+    ],
     "require": {
+        "ext-curl": "*",
+        "php": "7.4.23",
         "krugozor/database": "^2.0",
-        "phpmailer/phpmailer": "^6.4"
+        "phpmailer/phpmailer": "^6.4",
+        "vlucas/phpdotenv": "^v5.3.0"
     }
 }
