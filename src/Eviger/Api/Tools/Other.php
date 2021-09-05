@@ -4,14 +4,13 @@ namespace Eviger\Api\Tools;
 
 use Dotenv\Dotenv;
 use Eviger\Database;
-use Krugozor\Database\MySqlException;
 
 class Other
 {
 
     /**
      * @param array $array
-     * @return false|string
+     * @return string
      */
     public static function generateJson(array $array): string {
         return json_encode($array, JSON_UNESCAPED_UNICODE);
@@ -45,79 +44,66 @@ class Other
 
     /**
      * @param string $token
-     * @throws MySqlException
+     * @return string|void
      */
     public static function checkToken(string $token) {
 
-        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) {
+        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) return self::generateJson(["response" => ["error" => "token not found"]]);
 
-            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_deactivated_accounts WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->getNumRows()) die(sendJson(["response" => ["error" => "account deactivated", "canRestoreNow" => true]]));
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_deactivated_accounts WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->getNumRows()) return self::generateJson(["response" => ["error" => "account deactivated", "canRestoreNow" => true]]);
 
-            $bans = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
+        $bans = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
 
-            if ($bans->getNumRows()) {
+        if ($bans->getNumRows()) {
 
-                switch ($bans->fetchAssoc()['type']) {
+            switch ($bans->fetchAssoc()['type']) {
 
-                    case 1:
-                        die(
-                            self::generateJson(
-                                ["response" =>
-                                    ["error" => "account banned",
-                                        "details" => ["reason" => $bans->fetchAssoc()['reason']],
-                                        "canRestoreNow" => $bans->fetchAssoc()['time_unban'] > time()
-                                    ]
-                                ]
-                            )
-                        );
-                    case 2:
-                        die(
-                            self::generateJson(
-                                ["response" =>
-                                    ["error" => "account banned",
-                                        "details" => ["reason" => $bans->fetchAssoc()['reason']],
-                                        "canRestoreNow" => false
-                                    ]
-                                ]
-                            )
-                        );
-
-                }
+                case 1:
+                    return self::generateJson(
+                        ["response" =>
+                            ["error" => "account banned",
+                                "details" => ["reason" => $bans->fetchAssoc()['reason']],
+                                "canRestoreNow" => $bans->fetchAssoc()['time_unban'] > time()
+                            ]
+                        ]
+                    );
+                case 2:
+                    return self::generateJson(
+                        ["response" =>
+                            ["error" => "account banned",
+                                "details" => ["reason" => $bans->fetchAssoc()['reason']],
+                                "canRestoreNow" => false
+                            ]
+                        ]
+                    );
 
             }
-
-        } else {
-
-            die(self::generateJson(["response" => ["error" => "token not found"]]));
 
         }
 
     }
 
     /**
-     * @throws MySqlException
+     * @param string $token
+     * @return bool
      */
-    public static function checkAdmin(string $token) {
+    public static function checkAdmin(string $token): bool {
 
-        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] == 1) {
+        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) http_response_code(404);
 
-            self::checkToken($token);
+        self::checkToken($token);
 
-            if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] == 1) {
+        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) return false;
 
-                return true;
+        return true;
 
-            } else {
+    }
 
-                return false;
-
-            }
-
-        } else {
-
-            http_response_code(404);
-
+    public static function log(string $message) {
+        if (!file_exists('/var/log/API/')) {
+            mkdir('/var/log/API/', 0777, true);
         }
-
+        $time = date('D M j G:i:s');
+        file_put_contents("/var/log/API/error.log", "[$time] ".$message);
     }
 }

@@ -6,16 +6,7 @@ require_once "tools/vendor/autoload.php";
 
 use Eviger\Api\Methods\Email;
 use Eviger\Api\Tools\Other;
-use PHPMailer\PHPMailer\PHPMailer;
-
-$mail = new PHPMailer(true);
-$mail->isSMTP();
-$mail->Host = 'host';
-$mail->SMTPAuth = true;
-$mail->Username = 'user';
-$mail->Password = 'password';
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-$mail->Port = 587;
+use Eviger\Mail;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -27,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if (isset($data['email'])) {
 
-                Email::createCode($data['email'], $mail);
+                Email::createCode($data['email'], Mail::getInstance());
                 
             } else {
 

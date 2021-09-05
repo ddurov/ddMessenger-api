@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '49dc408a96a0e274a10df280f726bed69aaabcda',
+        'reference' => 'df64d018f1859f87ea883dea087e3c2cad42b701',
         'name' => 'eviger/api',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '49dc408a96a0e274a10df280f726bed69aaabcda',
+            'reference' => 'df64d018f1859f87ea883dea087e3c2cad42b701',
             'dev_requirement' => false,
         ),
         'graham-campbell/result-type' => array(
@@ -35,6 +35,15 @@
             'install_path' => __DIR__ . '/../krugozor/database',
             'aliases' => array(),
             'reference' => '836b7ff80604f748910f00d92a35a3ccaab77b0a',
+            'dev_requirement' => false,
+        ),
+        'mobiledetect/mobiledetectlib' => array(
+            'pretty_version' => '2.8.37',
+            'version' => '2.8.37.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mobiledetect/mobiledetectlib',
+            'aliases' => array(),
+            'reference' => '9841e3c46f5bd0739b53aed8ac677fa712943df7',
             'dev_requirement' => false,
         ),
         'phpmailer/phpmailer' => array(
