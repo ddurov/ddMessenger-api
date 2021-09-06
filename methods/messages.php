@@ -10,20 +10,20 @@ use Eviger\Api\Tools\Other;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $data = json_decode(file_get_contents('php://input'), true);
-    
-    Other::checkToken($data['token']);
+
+    $tokenStatus = Other::checkToken($data['token']);
+
+    $tokenStatus == true or die($tokenStatus);
 
     switch ($data['method']) {
 
         case 'send':
-
             if (!isset($data['to_id'])) die(Other::generateJson(["response" => ["error" => "to_id not setted"]]));
 
             if (!isset($data['text'])) die(Other::generateJson(["response" => ["error" => "text not setted"]]));
 
-            Messages::send($data['to_id'], $data['text'], $data['token']);
+            die(Messages::send($data['to_id'], $data['text'], $data['token']));
 
-        break;
         default:
             die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
 
@@ -31,22 +31,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 } else {
 
-    Other::checkToken($_GET['token']);
+    $tokenStatus = Other::checkToken($_GET['token']);
+
+    $tokenStatus == true or die($tokenStatus);
     
     switch ($_GET['method']) {
 
         case 'getDialogs':
+            die(Messages::getDialogs($_GET['token']));
 
-            Messages::getDialogs($_GET['token']);
-
-        break;
         case 'getHistory':
-
             if (!isset($_GET['id'])) die(Other::generateJson(["response" => ["error" => "id not setted"]]));
 
-            Messages::getHistory($_GET['id'], $_GET['token']);
+            die(Messages::getHistory($_GET['id'], $_GET['token']));
 
-        break;
         default:
             die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
 

@@ -32,7 +32,7 @@ class ComposerStaticInit70c427c595b67b31e6e2871eb0ed768d
         ),
         'Eviger\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/../src',
+            0 => __DIR__ . '/../..' . '/../Eviger',
         ),
     );
 
@@ -48,7 +48,26 @@ class ComposerStaticInit70c427c595b67b31e6e2871eb0ed768d
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Detection\\MobileDetect' => __DIR__ . '/..' . '/mobiledetect/mobiledetectlib/namespaced/Detection/MobileDetect.php',
+        'Eviger\\Api\\Methods\\Email' => __DIR__ . '/../..' . '/../Eviger/Api/Methods/Email.php',
+        'Eviger\\Api\\Methods\\Messages' => __DIR__ . '/../..' . '/../Eviger/Api/Methods/Messages.php',
+        'Eviger\\Api\\Methods\\Service' => __DIR__ . '/../..' . '/../Eviger/Api/Methods/Service.php',
+        'Eviger\\Api\\Methods\\User' => __DIR__ . '/../..' . '/../Eviger/Api/Methods/User.php',
+        'Eviger\\Api\\Methods\\Users' => __DIR__ . '/../..' . '/../Eviger/Api/Methods/Users.php',
+        'Eviger\\Api\\Tools\\Api' => __DIR__ . '/../..' . '/../Eviger/Api/Tools/Api.php',
+        'Eviger\\Api\\Tools\\Other' => __DIR__ . '/../..' . '/../Eviger/Api/Tools/Other.php',
+        'Eviger\\Contracts\\Singleton' => __DIR__ . '/../..' . '/../Eviger/Contracts/Singleton.php',
+        'Eviger\\Database' => __DIR__ . '/../..' . '/../Eviger/Database.php',
+        'Eviger\\Mail' => __DIR__ . '/../..' . '/../Eviger/Mail.php',
+        'Krugozor\\Database\\MySqlException' => __DIR__ . '/..' . '/krugozor/database/src/MySqlException.php',
+        'Krugozor\\Database\\Mysql' => __DIR__ . '/..' . '/krugozor/database/src/Mysql.php',
+        'Krugozor\\Database\\Statement' => __DIR__ . '/..' . '/krugozor/database/src/Statement.php',
         'Mobile_Detect' => __DIR__ . '/..' . '/mobiledetect/mobiledetectlib/Mobile_Detect.php',
+        'PHPMailer\\PHPMailer\\Exception' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/Exception.php',
+        'PHPMailer\\PHPMailer\\OAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuth.php',
+        'PHPMailer\\PHPMailer\\PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/PHPMailer.php',
+        'PHPMailer\\PHPMailer\\POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/POP3.php',
+        'PHPMailer\\PHPMailer\\SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/SMTP.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

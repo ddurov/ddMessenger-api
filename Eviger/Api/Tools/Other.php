@@ -77,6 +77,7 @@ class Other
             }
 
         }
+        return true;
 
     }
 
@@ -88,11 +89,11 @@ class Other
 
         if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) http_response_code(404);
 
-        self::checkToken($token);
+        if (self::checkToken($token))
 
-        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) return false;
+            if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) return false;
 
-        return true;
+            return true;
 
     }
 

@@ -14,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 	$data = json_decode(file_get_contents('php://input'), true);
 
-    (in_array($data['method'], ["registerAccount", "restorePassword"])) ? true : Other::checkToken($data['token']);
+    $tokenStatus = Other::checkToken($data['token']);
+
+    if (!in_array($data['method'], ["registerAccount", "restorePassword"])) $tokenStatus == true or die($tokenStatus);
 
 	switch ($data['method']) {
 
@@ -125,9 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			die(User::setOffline($data['token']));
 
         case 'changeName':
-            if (isset($data['name']) && isset($data['email']) && isset($data['code']) && isset($data['hashCode'])) {
-                die(User::changeName($data['name'], $data['email'], $data['code'], $data['hashCode']));
-            }
+            if (isset($data['name']) && isset($data['email']) && isset($data['code']) && isset($data['hashCode'])) die(User::changeName($data['name'], $data['email'], $data['code'], $data['hashCode']));
+
         break;
 
         default:
@@ -137,7 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 } else {
 
-	(in_array($_GET['method'], ["auth"])) ? true : Other::checkToken($_GET['token']);
+    $tokenStatus = Other::checkToken($_GET['token']);
+
+    if (!in_array($_GET['method'], ["auth"])) $tokenStatus == true or die($tokenStatus);
 
 	switch ($_GET['method']) {
 
@@ -147,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	
 				if (isset($_GET['password']) && (mb_strlen($_GET['password']) > 8 && mb_strlen($_GET['password']) < 60) && preg_match("/[a-zA-Z0-9_]/ui", $_GET['password'])) {
 	
-					User::auth($_GET['login'], $_GET['password']);
+					die(User::auth($_GET['login'], $_GET['password']));
 	
 				} elseif (!isset($_GET['password'])) {
 

@@ -10,22 +10,23 @@ use Eviger\Api\Tools\Other;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 	$data = json_decode(file_get_contents('php://input'), true);
-    
-    checkToken($data['token']);
+
+    $tokenStatus = Other::checkToken($data['token']);
+
+    $tokenStatus == true or die($tokenStatus);
 
     switch ($data['method']) {
 
-    	default:
-
-            echo sendJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]);
-
-        break;
+        default:
+            die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
 
     }
 
 } else {
 
-	checkToken($_GET['token']);
+    $tokenStatus = Other::checkToken($_GET['token']);
+
+    $tokenStatus == true or die($tokenStatus);
     
     switch ($_GET['method']) {
 
@@ -46,10 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			}
 
         default:
-
             die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
-
-        break;
 
     }
 
