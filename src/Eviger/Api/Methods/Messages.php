@@ -21,37 +21,25 @@ class Messages
 
             if (is_numeric($toId)) {
 
-                if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE id = ?i", (int)$toId)->getNumRows()) {
+                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE id = ?i", (int)$toId)->getNumRows()) return Other::generateJson(["response" => ["error" => "to_id incorrect"]]);
 
-                    $to_id = $toId;
-
-                } else {
-
-                    return Other::generateJson(["response" => ["error" => "to_id incorrect"]]);
-
-                }
+                $to_id = $toId;
 
             } else {
 
-                if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $toId)->getNumRows()) {
+                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $toId)->getNumRows()) return Other::generateJson(["response" => ["error" => "to_id incorrect"]]);
 
-                    $to_id = Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE username = '?s'", $toId)->fetchAssoc()['id'];
-
-                } else {
-
-                    return Other::generateJson(["response" => ["error" => "to_id incorrect"]]);
-
-                }
+                $to_id = Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE username = '?s'", $toId)->fetchAssoc()['id'];
 
             }
-
-            $time = time();
 
             $myId = Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
 
             $peers = Database::getInstance()->query("SELECT peers FROM eviger.eviger_dialogs WHERE peers REGEXP '(?i,?i|?i,?i)'", $myId, $to_id, $to_id, $myId)->fetchAssoc()['peers'];
 
             $checkDialog = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE peers REGEXP '(?i,?i|?i,?i)'", $myId, $to_id, $to_id, $myId)->getNumRows();
+
+            $time = time();
 
             if ($checkDialog) {
 
@@ -91,33 +79,21 @@ class Messages
 
             if (is_numeric($id)) {
 
-                if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE id = ?i", $id)->getNumRows()) {
+                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE id = ?i", $id)->getNumRows()) return Other::generateJson(["response" => ["error" => "id incorrect"]]);
 
-                    $id_getData = $id;
-
-                } else {
-
-                    return Other::generateJson(["response" => ["error" => "id incorrect"]]);
-
-                }
+                $idGetHistory = $id;
 
             } else {
 
-                if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $id)->getNumRows()) {
+                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $id)->getNumRows()) return Other::generateJson(["response" => ["error" => "id incorrect"]]);
 
-                    $id_getData = Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['id'];
-
-                } else {
-
-                    return Other::generateJson(["response" => ["error" => "id incorrect"]]);
-
-                }
+                $idGetHistory = Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['id'];
 
             }
 
             $myId = Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
 
-            $peers = Database::getInstance()->query("SELECT peers FROM eviger.eviger_dialogs WHERE peers REGEXP '(?i,?i|?i,?i)'", $myId, $id_getData, $id_getData, $myId)->fetchAssoc()['peers'];
+            $peers = Database::getInstance()->query("SELECT peers FROM eviger.eviger_dialogs WHERE peers REGEXP '(?i,?i|?i,?i)'", $myId, $idGetHistory, $idGetHistory, $myId)->fetchAssoc()['peers'];
 
             $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_messages WHERE peers = '?s'", $peers);
 

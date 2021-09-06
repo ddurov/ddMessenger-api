@@ -23,13 +23,13 @@ class User
         try {
 
             $salt = bin2hex(random_bytes(8));
-            $getCodeEmailStatus = Email::confirmCode($email, $emailCode, $hashCode);
+            $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
 
             if (json_decode($getCodeEmailStatus, true)['response'] === true) {
 
                 $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
 
-                Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $emailCode);
+                Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
                 Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
 
                 if ($username !== null) {
@@ -49,7 +49,7 @@ class User
 
             } else {
 
-                return Other::generateJson(["response" => ["error" => json_decode($getCodeEmailStatus, true)['response']['error']]]);
+                return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
 
             }
 
@@ -72,13 +72,14 @@ class User
             $salt = bin2hex(random_bytes(8));
             $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
             $idAccount = Database::getInstance()->query("SELECT id FROM eviger_users WHERE email = '?s'", $email)->fetchAssoc()['id'];
+            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
             Database::getInstance()->query("UPDATE eviger_users SET password_hash = '?s', password_salt = '?s' WHERE id = ?i", md5($newPassword.$salt), $salt, $idAccount);
             Database::getInstance()->query("UPDATE eviger_tokens SET token = '?s' WHERE eid = ?i", $token, $idAccount);
             return Other::generateJson(["response" => ["status" => "ok", "newToken" => $token]]);
 
         } catch (Exception $e) {
             Other::log($e->getMessage());
-            return "ERROR";
+            return "Internal error";
         }
 
     }
@@ -111,10 +112,11 @@ class User
 
         if ($getCodeEmailStatus['response'] === true) {
 
-            if (preg_match("/(eid+.|id+.)/", $newName)) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+            if (preg_match("/^(e)?id.*/gu", $newName)) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
 
             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) return Other::generateJson(["response" => ["error" => "username is busy"]]);
 
+            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
             Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
             return Other::generateJson(["response" => ["status" => "ok"]]);
 

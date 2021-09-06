@@ -16,36 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         case 'createCode':
             
-            if (isset($data['email'])) {
+            if (!isset($data['email'])) die(Other::generateJson(["response" => ["error" => "email not setted"]]));
 
-                Email::createCode($data['email'], Mail::getInstance());
-                
-            } else {
-
-                die(Other::generateJson(["response" => ["error" => "email not setted"]]));
-                
-            }
+            Email::createCode($data['email'], Mail::getInstance());
 
         break;
         case 'confirmCode':
 
-            if (isset($data['email'])) {
+            if (!isset($data['email'])) die(Other::generateJson(["response" => ["error" => "email not setted"]]));
     
-                if (isset($data['code'])) {
+            if (!isset($data['code'])) die(Other::generateJson(["response" => ["error" => "code not setted"]]));
 
-                    Email::confirmCode($data['email'], $data['code'], $data['hash']);
-                    
-                } else {
+            if (!isset($data['hash'])) die(Other::generateJson(["response" => ["error" => "hash not setted"]]));
 
-                    die(Other::generateJson(["response" => ["error" => "code not setted"]]));
-                    
-                }
-                
-            } else {
-
-                die(Other::generateJson(["response" => ["error" => "email not setted"]]));
-                
-            }
+            Email::confirmCode($data['email'], $data['code'], $data['hash']);
 
         break;
     	default:

@@ -2,7 +2,6 @@
 
 namespace Eviger\Api\Tools;
 
-use Dotenv\Dotenv;
 use Eviger\Database;
 
 class Other
@@ -21,7 +20,6 @@ class Other
      * @return string
      */
     public static function encryptMessage(string $message): string {
-        Dotenv::createImmutable("/var/www/tools")->load();
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
         $iv = openssl_random_pseudo_bytes($ivlen);
         $ciphertext_raw = openssl_encrypt($message, $cipher, $_ENV["hashKey"], OPENSSL_RAW_DATA, $iv);
@@ -34,7 +32,6 @@ class Other
      * @return string
      */
     public static function decryptMessage(string $messageEncoded): string {
-        Dotenv::createImmutable("/var/www/tools")->load();
         $c = base64_decode($messageEncoded);
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
         $iv = substr($c, 0, $ivlen);
@@ -44,9 +41,9 @@ class Other
 
     /**
      * @param string $token
-     * @return string|void
+     * @return string
      */
-    public static function checkToken(string $token) {
+    public static function checkToken(string $token): string {
 
         if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) return self::generateJson(["response" => ["error" => "token not found"]]);
 
@@ -99,7 +96,10 @@ class Other
 
     }
 
-    public static function log(string $message) {
+    /**
+     * @param string $message
+     */
+    public static function log(string $message): void {
         if (!file_exists('/var/log/API/')) {
             mkdir('/var/log/API/', 0777, true);
         }

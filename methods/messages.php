@@ -11,29 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $data = json_decode(file_get_contents('php://input'), true);
     
-    (new Other)->checkToken($data['token']);
+    Other::checkToken($data['token']);
 
     switch ($data['method']) {
 
         case 'send':
 
-            if (isset($data['to_id'])) {
+            if (!isset($data['to_id'])) die(Other::generateJson(["response" => ["error" => "to_id not setted"]]));
 
-                if (isset($data['text'])) {
+            if (!isset($data['text'])) die(Other::generateJson(["response" => ["error" => "text not setted"]]));
 
-                    Messages::send($data['to_id'], $data['text'], $data['token']);
-
-                } else {
-
-                    die(Other::generateJson(["response" => ["error" => "text not setted"]]));
-
-                }
-
-            } else {
-
-                die(Other::generateJson(["response" => ["error" => "to_id not setted"]]));
-
-            }
+            Messages::send($data['to_id'], $data['text'], $data['token']);
 
         break;
         default:
@@ -54,15 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         break;
         case 'getHistory':
 
-            if (isset($_GET['id'])) {
+            if (!isset($_GET['id'])) die(Other::generateJson(["response" => ["error" => "id not setted"]]));
 
-                Messages::getHistory($_GET['id'], $_GET['token']);
-
-            } else {
-
-                die(Other::generateJson(["response" => ["error" => "id not setted"]]));
-
-            }
+            Messages::getHistory($_GET['id'], $_GET['token']);
 
         break;
         default:

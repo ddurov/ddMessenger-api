@@ -4,7 +4,6 @@ namespace Eviger;
 
 use Eviger\Contracts\Singleton;
 use Krugozor\Database\Mysql;
-use Dotenv\Dotenv;
 
 class Database implements Singleton
 {
@@ -12,10 +11,9 @@ class Database implements Singleton
 
     public static function getInstance(): Mysql
     {
-        Dotenv::createImmutable("/var/www/tools")->load();
         if (self::$instance === null) {
-            self::$instance = Mysql::create($_ENV['serverDatabase'], $_ENV['loginDatabase'], $_ENV['passwordDatabase'])
-                ->setDatabaseName($_ENV['nameDatabase'])
+            self::$instance = Mysql::create("localhost", "login", "password")
+                ->setDatabaseName("eviger")
                 ->setCharset("utf8mb4");
         }
 

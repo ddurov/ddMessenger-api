@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                         if ($data['userName'] !== null && isset($data['userName'])) {
 
-                            if (preg_match("/(eid+.|id+.)/", $data['userName'])) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+                            if (preg_match("/^(e)?id.*/gu", $data['userName'])) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
 
                             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $data['userName'])->getNumRows()) die(Other::generateJson(["response" => ["error" => "username is busy"]]));
 
@@ -98,39 +98,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 		break;
 		case 'restorePassword':
-			if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s' AND email = '?s'", $data['login'], $data['email'])->getNumRows()) {
+			if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s' AND email = '?s'", $data['login'], $data['email'])->getNumRows()) die(Other::generateJson(["response" => ["error" => "login/email pair is not correct"]]));
 
-				if (!isset($data['confirmCode'])) {
+            if (!isset($data['confirmCode'])) {
 
-                    $getCode = json_decode(Email::createCode($data['email'], Mail::getInstance()), true);
+                $getCode = json_decode(Email::createCode($data['email'], Mail::getInstance()), true);
 
-					if ($getCode['response']['error']) {
-                        die(Other::generateJson(["response" => ["error" => $getCode['response']['error']]]));
-                    } else {
-                        die(Other::generateJson(["response" => ["status" => "confirm your email", "hash" => $getCode['response']["hash"]]]));
-                    }
+                if ($getCode['response']['status'] !== "ok") die(Other::generateJson(["response" => ["error" => $getCode['response']['error']]]));
 
-				} else {
+                die(Other::generateJson(["response" => ["status" => "confirm your email", "hash" => $getCode['response']["hash"]]]));
 
-                    $confirmCode = json_decode(Email::confirmCode($data['email'], $data['confirmCode'], $data['hash']));
+            } else {
 
-					if (!isset($confirmCode['response']['error'])) {
+                $confirmCode = json_decode(Email::confirmCode($data['email'], $data['confirmCode'], $data['hash']));
 
-                        die(User::restorePassword($data['email'], $data['newPassword']));
+                if ($confirmCode['response'] !== true) die(Other::generateJson(["response" => ["error" => $confirmCode['response']['error']]]));
 
-					} else {
+                die(User::restorePassword($data['email'], $data['newPassword']));
 
-						die(Other::generateJson(["response" => ["error" => $confirmCode['response']['error']]]));
-
-					}
-
-				}
-
-			} else {
-
-                die(Other::generateJson(["response" => ["error" => "login/email pair is not correct"]]));
-
-			}
+            }
 
         case 'setOnline':
             die(User::setOnline($data['token']));
@@ -142,8 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (isset($data['name']) && isset($data['email']) && isset($data['code']) && isset($data['hashCode'])) {
                 die(User::changeName($data['name'], $data['email'], $data['code'], $data['hashCode']));
             }
+        break;
 
-		default:
+        default:
 			die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $data === null ? [] : $data]]));
 
     }
@@ -196,11 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 		break;
 		default:
-
             die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $_GET]]));
 
-		break;
-
-	}
+    }
 
 }
