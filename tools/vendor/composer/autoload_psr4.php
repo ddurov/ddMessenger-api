@@ -8,5 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'Krugozor\\Database\\' => array($vendorDir . '/krugozor/database/src'),
-    'Eviger\\' => array($baseDir . '/../Eviger'),
+    'Eviger\\' => array($baseDir . '/Eviger'),
 );
