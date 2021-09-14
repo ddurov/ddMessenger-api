@@ -34,7 +34,7 @@ class Email
                 Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, hash) VALUES ('?s', '?s', ?i, '?s')", $code, $email, time(), $hash);
             }
 
-            $mail->setFrom('user@host');
+            $mail->setFrom('user@domain.com');
             $mail->addAddress($email);
 
             $mail->isHTML(true);

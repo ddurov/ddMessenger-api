@@ -13,7 +13,7 @@ class Database implements Singleton
     {
         if (self::$instance === null) {
             self::$instance = Mysql::create("localhost", "login", "password")
-                ->setDatabaseName("eviger")
+                ->setDatabaseName("name")
                 ->setCharset("utf8mb4");
         }
 

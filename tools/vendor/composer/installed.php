@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'bc4f3308c18a2b9983933a3c9f9025d47eae6a0c',
+        'reference' => '5373cbc4429e132a0507214d5ccf1a5161a825f2',
         'name' => 'eviger/api',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'bc4f3308c18a2b9983933a3c9f9025d47eae6a0c',
+            'reference' => '5373cbc4429e132a0507214d5ccf1a5161a825f2',
             'dev_requirement' => false,
         ),
         'krugozor/database' => array(
