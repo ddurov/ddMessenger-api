@@ -13,16 +13,18 @@ use Eviger\Api\Tools\Other;
 use Eviger\Database;
 use Eviger\Mail;
 
-preg_match("~^/methods/(.*)$~", $_SERVER['REQUEST_URI'], $matches);
+preg_match("~/methods/(.*)~", $_SERVER['REQUEST_URI'], $matches);
 
 if (count($matches) === 0) {
     echo time();
     return;
 }
 
-if (!isset($matches[1])) die(Other::generateJson(["response" => ["error" => "method not setted"]]));
+$method = explode("?", $matches[1])[0];
 
-$mixedData = $_SERVER['REQUEST_METHOD'] === "GET" ? $_GET : json_decode(file_get_contents('php://input'), true);
+if (!isset($method)) die(Other::generateJson(["response" => ["error" => "method not setted"]]));
+
+$mixedData = $_SERVER['REQUEST_METHOD'] == "GET" ? $_GET : json_decode(file_get_contents('php://input'), true);
 
 if (!isset($mixedData['method'])) die(Other::generateJson(["response" => ["error" => "sub-method not setted"]]));
 
@@ -32,7 +34,7 @@ if (!in_array($mixedData['method'], ["getUpdates", "auth", "registerAccount", "r
     if (!$checkToken) die($checkToken);
 }
 
-switch ($matches[1]) {
+switch ($method) {
     
     case "email":
         if ($_SERVER['REQUEST_METHOD'] === "GET") {
@@ -60,7 +62,7 @@ switch ($matches[1]) {
                     die(Email::confirmCode($mixedData['email'], $mixedData['code'], $mixedData['hash']));
 
                 default:
-                    die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $mixedData === null ? [] : $mixedData]]));
+                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData === null ? [] : $mixedData]]));
                 
             }
         }
@@ -111,7 +113,7 @@ switch ($matches[1]) {
                     die(Messages::send($mixedData['to_id'], $mixedData['text'], $mixedData['token']));
 
                 default:
-                    die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $mixedData === null ? [] : $mixedData]]));
+                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData === null ? [] : $mixedData]]));
 
             }
         }
@@ -278,7 +280,7 @@ switch ($matches[1]) {
                     break;
 
                 default:
-                    die(Other::generateJson(["response" => ["error" => "unknown method", "parameters" => $mixedData === null ? [] : $mixedData]]));
+                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData === null ? [] : $mixedData]]));
             }
         }
     break;
