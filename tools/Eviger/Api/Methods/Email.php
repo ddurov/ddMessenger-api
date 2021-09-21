@@ -15,14 +15,15 @@ class Email
      * @param PHPMailer $mail
      * @return string
      */
-    public static function createCode(string $email, PHPMailer $mail): string {
+    public static function createCode(string $email, PHPMailer $mail): string
+    {
 
         try {
 
             if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $email)) return Other::generateJson(["response" => ["error" => "email incorrect"]]);
 
             $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
-            $hash = md5($code."|".bin2hex(random_bytes(8)));
+            $hash = md5($code . "|" . bin2hex(random_bytes(8)));
 
             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
                 if ((time() - Database::getInstance()->query("SELECT date_request FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request']) > 300) {
@@ -60,7 +61,8 @@ class Email
      * @param string $hash
      * @return string
      */
-    public static function confirmCode(string $email, string $code, string $hash): string {
+    public static function confirmCode(string $email, string $code, string $hash): string
+    {
 
         try {
 

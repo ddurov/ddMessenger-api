@@ -11,7 +11,8 @@ class Other
      * @param array $array
      * @return string
      */
-    public static function generateJson(array $array): string {
+    public static function generateJson(array $array): string
+    {
         return json_encode($array, JSON_UNESCAPED_UNICODE);
     }
 
@@ -19,23 +20,25 @@ class Other
      * @param string $message
      * @return string
      */
-    public static function encryptMessage(string $message): string {
+    public static function encryptMessage(string $message): string
+    {
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
         $iv = openssl_random_pseudo_bytes($ivlen);
         $ciphertext_raw = openssl_encrypt($message, $cipher, $_ENV["hashKey"], OPENSSL_RAW_DATA, $iv);
         $hmac = hash_hmac('sha256', $ciphertext_raw, $_ENV["hashKey"], true);
-        return base64_encode($iv.$hmac.$ciphertext_raw);
+        return base64_encode($iv . $hmac . $ciphertext_raw);
     }
 
     /**
      * @param string $messageEncoded
      * @return string
      */
-    public static function decryptMessage(string $messageEncoded): string {
+    public static function decryptMessage(string $messageEncoded): string
+    {
         $c = base64_decode($messageEncoded);
         $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
         $iv = substr($c, 0, $ivlen);
-        $text_encrypted_raw = substr($c, $ivlen+32);
+        $text_encrypted_raw = substr($c, $ivlen + 32);
         return openssl_decrypt($text_encrypted_raw, $cipher, $_ENV["hashKey"], OPENSSL_RAW_DATA, $iv);
     }
 
@@ -43,7 +46,8 @@ class Other
      * @param string $token
      * @return string
      */
-    public static function checkToken(string $token): string {
+    public static function checkToken(string $token): string
+    {
 
         if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) return self::generateJson(["response" => ["error" => "token not found"]]);
 
@@ -85,7 +89,8 @@ class Other
      * @param string $token
      * @return bool
      */
-    public static function checkAdmin(string $token): bool {
+    public static function checkAdmin(string $token): bool
+    {
 
         if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) http_response_code(404);
 
@@ -93,18 +98,19 @@ class Other
 
             if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) return false;
 
-            return true;
+        return true;
 
     }
 
     /**
      * @param string $message
      */
-    public static function log(string $message): void {
+    public static function log(string $message): void
+    {
         if (!file_exists('/var/log/API/')) {
             mkdir('/var/log/API/', 0777, true);
         }
         $time = date('D M j G:i:s');
-        file_put_contents("/var/log/API/error.log", "[$time] ".$message);
+        file_put_contents("/var/log/API/error.log", "[$time] " . $message);
     }
 }

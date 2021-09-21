@@ -18,7 +18,8 @@ class User
      * @param string $hashCode
      * @return string
      */
-    public static function registerAccount(string $login, string $password, string $email, ?string $username, string $emailCode, string $hashCode): string {
+    public static function registerAccount(string $login, string $password, string $email, ?string $username, string $emailCode, string $hashCode): string
+    {
 
         try {
 
@@ -34,11 +35,11 @@ class User
 
                 if ($username !== null) {
 
-                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password.$salt), $salt, $username, $email);
+                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, $username, $email);
 
                 } else {
 
-                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password.$salt), $salt, NULL, $email);
+                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, NULL, $email);
                     Database::getInstance()->query("UPDATE eviger_users SET username = 'eid?i' WHERE login = '?s'", Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $login);
 
                 }
@@ -65,7 +66,8 @@ class User
      * @param string $newPassword
      * @return string
      */
-    public static function restorePassword(string $email, string $newPassword): string {
+    public static function restorePassword(string $email, string $newPassword): string
+    {
 
         try {
 
@@ -73,7 +75,7 @@ class User
             $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
             $idAccount = Database::getInstance()->query("SELECT id FROM eviger_users WHERE email = '?s'", $email)->fetchAssoc()['id'];
             Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
-            Database::getInstance()->query("UPDATE eviger_users SET password_hash = '?s', password_salt = '?s' WHERE id = ?i", md5($newPassword.$salt), $salt, $idAccount);
+            Database::getInstance()->query("UPDATE eviger_users SET password_hash = '?s', password_salt = '?s' WHERE id = ?i", md5($newPassword . $salt), $salt, $idAccount);
             Database::getInstance()->query("UPDATE eviger_tokens SET token = '?s' WHERE eid = ?i", $token, $idAccount);
             return Other::generateJson(["response" => ["status" => "ok", "newToken" => $token]]);
 
@@ -88,7 +90,8 @@ class User
      * @param string $token
      * @return string
      */
-    public static function setOnline(string $token): string {
+    public static function setOnline(string $token): string
+    {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET online = 1, lastSeen = 0 WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
         return Other::generateJson(["response" => ["status" => "ok"]]);
@@ -99,14 +102,16 @@ class User
      * @param string $token
      * @return string
      */
-    public static function setOffline(string $token): string {
+    public static function setOffline(string $token): string
+    {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET online = 0, lastSeen = ?i WHERE id = ?i", time(), Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
         return Other::generateJson(["response" => ["status" => "ok"]]);
 
     }
 
-    public static function changeName(string $newName, string $email, string $codeEmail, string $hashCode): string {
+    public static function changeName(string $newName, string $email, string $codeEmail, string $hashCode): string
+    {
 
         $getCodeEmailStatus = json_decode(Email::confirmCode($email, $codeEmail, $hashCode), true);
 
@@ -133,11 +138,12 @@ class User
      * @param string $password
      * @return string
      */
-    public static function auth(string $login, string $password): string {
+    public static function auth(string $login, string $password): string
+    {
 
         $salt = Database::getInstance()->query("SELECT password_salt FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['password_salt'];
 
-        if (md5($password.$salt) == Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) {
+        if (md5($password . $salt) == Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) {
 
             if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 

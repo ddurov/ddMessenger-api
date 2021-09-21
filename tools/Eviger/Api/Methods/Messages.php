@@ -15,7 +15,8 @@ class Messages
      * @param string $token
      * @return string
      */
-    public static function send(string $toId, string $text, string $token): string {
+    public static function send(string $toId, string $text, string $token): string
+    {
 
         try {
 
@@ -53,9 +54,9 @@ class Messages
 
             } else {
 
-                Database::getInstance()->query("INSERT INTO eviger.eviger_dialogs (peers, last_message_sender, last_message_id, last_message_date, last_message) VALUES ('?s', ?i, 1, ?i, '?s')", $myId.",".$to_id, $myId, $time, Other::encryptMessage($text));
+                Database::getInstance()->query("INSERT INTO eviger.eviger_dialogs (peers, last_message_sender, last_message_id, last_message_date, last_message) VALUES ('?s', ?i, 1, ?i, '?s')", $myId . "," . $to_id, $myId, $time, Other::encryptMessage($text));
 
-                Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', 1, ?i, ?i, '?s', ?i)", $myId.",".$to_id, $myId, $to_id, Other::encryptMessage($text), $time);
+                Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', 1, ?i, ?i, '?s', ?i)", $myId . "," . $to_id, $myId, $to_id, Other::encryptMessage($text), $time);
 
                 return Other::generateJson(["response" => ["id" => 1]]);
 
@@ -73,7 +74,8 @@ class Messages
      * @param $token
      * @return string
      */
-    public static function getHistory($id, $token): string {
+    public static function getHistory($id, $token): string
+    {
 
         try {
 
@@ -118,7 +120,8 @@ class Messages
      * @param string $token
      * @return string
      */
-    public static function getDialogs(string $token): string {
+    public static function getDialogs(string $token): string
+    {
 
         try {
 

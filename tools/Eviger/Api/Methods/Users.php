@@ -12,7 +12,8 @@ class Users
      * @param string|null $id
      * @return string
      */
-    public static function get(string $token, ?string $id = NULL): string {
+    public static function get(string $token, ?string $id = NULL): string
+    {
         if ($id === NULL) {
 
             return Other::generateJson(
@@ -23,7 +24,7 @@ class Users
                     "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['lastSeen'],
                     "email" => Database::getInstance()->query("SELECT email FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['email']
                 ]
-            ]);
+                ]);
 
         } else {
 
@@ -38,7 +39,7 @@ class Users
                         "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['online'],
                         "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['lastSeen']
                     ]
-                ]);
+                    ]);
 
             } else {
 
@@ -51,7 +52,7 @@ class Users
                         "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['online'],
                         "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['lastSeen']
                     ]
-                ]);
+                    ]);
 
             }
 
@@ -62,7 +63,8 @@ class Users
      * @param string $query
      * @return string
      */
-    public static function search(string $query): string {
+    public static function search(string $query): string
+    {
         $a = [];
         $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username LIKE '%?S%'", $query);
 
