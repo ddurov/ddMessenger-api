@@ -25,7 +25,7 @@ class User
             $salt = bin2hex(random_bytes(8));
             $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
 
-            if (json_decode($getCodeEmailStatus, true)['response'] === true) {
+            if ($getCodeEmailStatus['response'] === true) {
 
                 $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
 
@@ -55,7 +55,7 @@ class User
 
         } catch (Exception $e) {
             Other::log($e->getMessage());
-            return "ERROR";
+            return "Internal error";
         }
 
     }
