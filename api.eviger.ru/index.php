@@ -28,7 +28,7 @@ $mixedData = $_SERVER['REQUEST_METHOD'] == "GET" ? $_GET : json_decode(file_get_
 
 if (!isset($mixedData['method'])) die(Other::generateJson(["response" => ["error" => "sub-method not setted"]]));
 
-if (!in_array($mixedData['method'], ["getUpdates", "auth", "registerAccount", "restorePassword"])) {
+if (!in_array($mixedData['method'], ["getUpdates", "auth", "registerAccount", "restorePassword", "createCode", "confirmCode"])) {
     if (!isset($mixedData['token'])) die(Other::generateJson(["response" => ["error" => "token not setted"]]));
     $checkToken = Other::checkToken($mixedData['token']);
     if (!$checkToken) die($checkToken);
@@ -62,7 +62,7 @@ switch ($method) {
                     die(Email::confirmCode($mixedData['email'], $mixedData['code'], $mixedData['hash']));
 
                 default:
-                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData === null ? [] : $mixedData]]));
+                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData]]));
 
             }
         }
@@ -113,7 +113,7 @@ switch ($method) {
                     die(Messages::send($mixedData['to_id'], $mixedData['text'], $mixedData['token']));
 
                 default:
-                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData === null ? [] : $mixedData]]));
+                    die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData]]));
 
             }
         }
