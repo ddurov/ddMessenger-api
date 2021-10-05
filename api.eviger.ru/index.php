@@ -50,6 +50,8 @@ switch ($method) {
                 case 'createCode':
                     if (!isset($mixedData['email'])) die(Other::generateJson(["response" => ["error" => "email not setted"]]));
 
+                    if (preg_match("/(.*)?eviger\.ru/isu", $mixedData['email'])) die(Other::generateJson(["response" => ["error" => "email must not contain domains of any level eviger.ru"]]));
+
                     die(Email::createCode($mixedData['email'], Mail::getInstance()));
 
                 case 'confirmCode':
