@@ -28,33 +28,20 @@ class Users
 
         } else {
 
-            if (is_numeric($id)) {
+            $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE id = ?i", $id)->getNumRows()) return Other::generateJson(["response" => ["error" => "user not found"]]);
+            if (!$selectAllOfUserObject->getNumRows()) return Other::generateJson(["response" => ["error" => "id incorrect"]]);
 
-                return Other::generateJson(
-                    ["response" => [
-                        "eid" => (int)Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['id'],
-                        "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['username'],
-                        "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['online'],
-                        "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $id)->fetchAssoc()['lastSeen']
-                    ]
-                    ]);
+            $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
 
-            } else {
-
-                if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $id)->getNumRows()) return Other::generateJson(["response" => ["error" => "user not found"]]);
-
-                return Other::generateJson(
-                    ["response" => [
-                        "eid" => (int)Database::getInstance()->query("SELECT id FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['id'],
-                        "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['username'],
-                        "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['online'],
-                        "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE username = '?s'", $id)->fetchAssoc()['lastSeen']
-                    ]
-                    ]);
-
-            }
+            return Other::generateJson(
+                ["response" => [
+                    "eid" => (int)$idParsed,
+                    "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'],
+                    "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['online'],
+                    "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']
+                ]
+                ]);
 
         }
     }
