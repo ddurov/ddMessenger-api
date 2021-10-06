@@ -4,11 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once "../tools/vendor/autoload.php";
 
-use Eviger\Api\Methods\Service;
-use Eviger\Api\Methods\Messages;
 use Eviger\Api\Methods\Email;
-use Eviger\Api\Methods\Users;
+use Eviger\Api\Methods\Messages;
+use Eviger\Api\Methods\Service;
 use Eviger\Api\Methods\User;
+use Eviger\Api\Methods\Users;
 use Eviger\Api\Tools\Other;
 use Eviger\Database;
 use Eviger\Mail;
@@ -49,8 +49,6 @@ switch ($method) {
 
                 case 'createCode':
                     if (!isset($mixedData['email'])) die(Other::generateJson(["response" => ["error" => "email not setted"]]));
-
-                    if (preg_match("/(.*)?eviger\.ru/isu", $mixedData['email'])) die(Other::generateJson(["response" => ["error" => "email must not contain domains of any level eviger.ru"]]));
 
                     die(Email::createCode($mixedData['email'], Mail::getInstance()));
 
