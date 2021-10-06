@@ -14,10 +14,10 @@ class Mail implements Singleton
         if (self::$instance === null) {
             self::$instance = new PHPMailer();
             self::$instance->isSMTP();
-            self::$instance->Host = 'host';
+            self::$instance->Host = getenv("MAIL_SERVER");
             self::$instance->SMTPAuth = true;
-            self::$instance->Username = 'user';
-            self::$instance->Password = 'password';
+            self::$instance->Username = getenv("MAIL_LOGIN");
+            self::$instance->Password = getenv("MAIL_PASSWORD");
             self::$instance->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             self::$instance->Port = 587;
         }

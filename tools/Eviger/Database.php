@@ -12,8 +12,8 @@ class Database implements Singleton
     public static function getInstance(): Mysql
     {
         if (self::$instance === null) {
-            self::$instance = Mysql::create("localhost", "login", "password")
-                ->setDatabaseName("name")
+            self::$instance = Mysql::create(getenv("DATABASE_SERVER"), getenv("DATABASE_LOGIN"), getenv("DATABASE_PASSWORD"))
+                ->setDatabaseName(getenv("DATABASE_NAME"))
                 ->setCharset("utf8mb4");
         }
 
