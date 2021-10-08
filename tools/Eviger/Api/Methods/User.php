@@ -148,7 +148,9 @@ class User
             if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 
                 // TODO: Ban user
-                return Other::generateJson(["response" => ["error" => "too many authorizations, account has been frozen"]]);
+
+                $dataOfBannedProfile = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['eid']);
+                return Other::generateJson(["response" => ["error" => "account banned", "details" => ["reason" => $dataOfBannedProfile->fetchAssoc()['reason'], "canRestore" => (time() > $dataOfBannedProfile->fetchAssoc()['time_unban'])]]]);
 
             } else {
 

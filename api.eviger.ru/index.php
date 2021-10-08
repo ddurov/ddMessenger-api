@@ -197,13 +197,7 @@ switch ($method) {
 
                     } else {
 
-                        $getCode = json_decode(Email::createCode($mixedData['email'], Mail::getInstance()), true);
-
-                        if (isset($getCode['response']['error'])) {
-                            die(Other::generateJson(["response" => ["error" => $getCode['response']['error']]]));
-                        } else {
-                            die(Other::generateJson(["response" => ["status" => "confirm your email", "hash" => $getCode['response']["hash"]]]));
-                        }
+                        die(Other::generateJson(["response" => ["error" => "registrationEmailCode not setted"]]));
 
                     }
 

@@ -63,8 +63,7 @@ class Other
                     return self::generateJson(
                         ["response" =>
                             ["error" => "account banned",
-                                "details" => ["reason" => $bans->fetchAssoc()['reason']],
-                                "canRestoreNow" => $bans->fetchAssoc()['time_unban'] > time()
+                                "details" => ["reason" => $bans->fetchAssoc()['reason'], "canRestoreNow" => (time() > $bans->fetchAssoc()['time_unban'])]
                             ]
                         ]
                     );
@@ -72,8 +71,7 @@ class Other
                     return self::generateJson(
                         ["response" =>
                             ["error" => "account banned",
-                                "details" => ["reason" => $bans->fetchAssoc()['reason']],
-                                "canRestoreNow" => false
+                                "details" => ["reason" => $bans->fetchAssoc()['reason'], "canRestoreNow" => false]
                             ]
                         ]
                     );
