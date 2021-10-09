@@ -20,7 +20,6 @@ class Users
                 ["response" => [
                     "eid" => (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'],
                     "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['username'],
-                    "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['online'],
                     "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['lastSeen'],
                     "email" => Database::getInstance()->query("SELECT email FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['email']
                 ]
@@ -38,7 +37,6 @@ class Users
                 ["response" => [
                     "eid" => (int)$idParsed,
                     "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'],
-                    "online" => (int)Database::getInstance()->query("SELECT online FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['online'],
                     "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']
                 ]
                 ]);
@@ -57,7 +55,9 @@ class Users
 
         while ($data_parsed = $data->fetchAssoc()) {
 
-            $a[] = ["eid" => (int)$data_parsed['id'], "username" => $data_parsed['username'], "online" => (int)$data_parsed['online'], "lastSeen" => (int)$data_parsed['lastSeen']];
+            $a[] = ["eid" => (int)$data_parsed['id'],
+                    "username" => $data_parsed['username'],
+                    "lastSeen" => (int)$data_parsed['lastSeen']];
 
         }
 
