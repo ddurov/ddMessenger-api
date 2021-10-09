@@ -93,7 +93,7 @@ class User
     public static function setOnline(string $token): string
     {
 
-        Database::getInstance()->query("UPDATE eviger.eviger_users SET online = 1, lastSeen = 0 WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
+        Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1, lastSendedOnline = ?i WHERE id = ?i", time(), Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
         return Other::generateJson(["response" => ["status" => "ok"]]);
 
     }
@@ -105,7 +105,7 @@ class User
     public static function setOffline(string $token): string
     {
 
-        Database::getInstance()->query("UPDATE eviger.eviger_users SET online = 0, lastSeen = ?i WHERE id = ?i", time(), Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
+        Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1 WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
         return Other::generateJson(["response" => ["status" => "ok"]]);
 
     }
