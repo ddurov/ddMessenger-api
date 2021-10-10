@@ -39,8 +39,7 @@ class User
 
                 } else {
 
-                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, NULL, $email);
-                    Database::getInstance()->query("UPDATE eviger_users SET username = 'eid?i' WHERE login = '?s'", Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $login);
+                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, "eid".Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $email);
 
                 }
 
@@ -117,7 +116,7 @@ class User
 
         if ($getCodeEmailStatus['response'] === true) {
 
-            if (preg_match("/^(e)?id.*/gu", $newName)) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+            if (preg_match("/^e?id+[\d]+/gu", $newName)) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
 
             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) return Other::generateJson(["response" => ["error" => "username is busy"]]);
 
