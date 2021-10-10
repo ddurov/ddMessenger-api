@@ -157,7 +157,7 @@ switch ($method) {
 
                     if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) die(Other::generateJson(["response" => ["error" => "the login is too big or too small"]]));
 
-                    if (!preg_match("/[a-zA-Z0-9_]/gu", $mixedData['login'])) die(Other::generateJson(["response" => ["error" => "the login must contain a-z, A-Z, 0-9 and _"]]));
+                    if (!preg_match("/[a-zA-Z0-9_]/u", $mixedData['login'])) die(Other::generateJson(["response" => ["error" => "the login must contain a-z, A-Z, 0-9 and _"]]));
 
                     if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s'", $mixedData['login'])->getNumRows()) die(Other::generateJson(["response" => ["error" => "the user is already registered"]]));
 
@@ -167,7 +167,7 @@ switch ($method) {
 
                     if ((mb_strlen($mixedData['password']) <= 8 || $mixedData['password'] >= 64)) die(Other::generateJson(["response" => ["error" => "the password is too big or too small"]]));
 
-                    if (!preg_match("/[a-zA-Z0-9_]/gu", $mixedData['password'])) die(Other::generateJson(["response" => ["error" => "the password must contain a-z, A-Z, 0-9 and _"]]));
+                    if (!preg_match("/[a-zA-Z0-9_]/u", $mixedData['password'])) die(Other::generateJson(["response" => ["error" => "the password must contain a-z, A-Z, 0-9 and _"]]));
 
                     // email checks
 
@@ -183,7 +183,7 @@ switch ($method) {
 
                         if (mb_strlen($mixedData['userName']) < 6 || mb_strlen($mixedData['userName']) > 128) die(Other::generateJson(["response" => ["error" => "username must be more than 6 or less than 128 characters"]]));
 
-                        if (preg_match("/^e?id+[\d]+/gu", $mixedData['userName'])) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+                        if (preg_match("/^e?id+[\d]+/u", $mixedData['userName'])) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
 
                         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $mixedData['userName'])->getNumRows()) die(Other::generateJson(["response" => ["error" => "username is busy"]]));
 
