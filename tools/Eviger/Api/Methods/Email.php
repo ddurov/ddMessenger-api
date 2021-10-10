@@ -32,7 +32,7 @@ class Email
 
                 Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', date_request = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
             } else {
-                Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
+                Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
             }
 
             $mail->setFrom(getenv("USER_MAIL_DOMAIN"));
