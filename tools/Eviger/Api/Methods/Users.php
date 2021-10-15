@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger\Api\Methods;
 
 use Eviger\Api\Tools\Other;
@@ -25,23 +27,24 @@ class Users
                 ]
                 ]);
 
-        } else {
+        }
 
-            $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
+        $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-            if (!$selectAllOfUserObject->getNumRows()) return Other::generateJson(["response" => ["error" => "id incorrect"]]);
+        if (!$selectAllOfUserObject->getNumRows()) {
+            return Other::generateJson(["response" => ["error" => "id incorrect"]]);
+        }
 
-            $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
+        $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
 
-            return Other::generateJson(
-                ["response" => [
+        return Other::generateJson(
+            [
+                "response" => [
                     "eid" => (int)$idParsed,
                     "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'],
                     "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']
                 ]
-                ]);
-
-        }
+            ]);
     }
 
     /**
@@ -56,8 +59,8 @@ class Users
         while ($data_parsed = $data->fetchAssoc()) {
 
             $a[] = ["eid" => (int)$data_parsed['id'],
-                    "username" => $data_parsed['username'],
-                    "lastSeen" => (int)$data_parsed['lastSeen']];
+                "username" => $data_parsed['username'],
+                "lastSeen" => (int)$data_parsed['lastSeen']];
 
         }
 
