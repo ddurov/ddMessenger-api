@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger\Api\Tools;
 
 use Eviger\Database;
@@ -49,9 +51,13 @@ class Other
     public static function checkToken(string $token): string
     {
 
-        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) return self::generateJson(["response" => ["error" => "token not found"]]);
+        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) {
+            return self::generateJson(["response" => ["error" => "token not found"]]);
+        }
 
-        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_deactivated_accounts WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->getNumRows()) return self::generateJson(["response" => ["error" => "account deactivated", "canRestoreNow" => true]]);
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_deactivated_accounts WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->getNumRows()) {
+            return self::generateJson(["response" => ["error" => "account deactivated", "canRestoreNow" => true]]);
+        }
 
         $bans = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
 
@@ -79,7 +85,6 @@ class Other
             }
 
         }
-        return true;
 
     }
 
@@ -90,13 +95,11 @@ class Other
     public static function checkAdmin(string $token): bool
     {
 
-        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) http_response_code(404);
+        if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) {
+            http_response_code(404);
+        }
 
-        if (self::checkToken($token))
-
-            if (Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1) return false;
-
-        return true;
+        return !(self::checkToken($token) && Database::getInstance()->query("SELECT isAdmin FROM eviger.eviger_users WHERE login = '?s'", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['isAdmin'] !== 1);
 
     }
 
@@ -105,8 +108,8 @@ class Other
      */
     public static function log(string $message): void
     {
-        if (!file_exists('/var/log/API/')) {
-            mkdir('/var/log/API/', 0777, true);
+        if (!file_exists('/var/log/API/') && !mkdir('/var/log/API/', 0777, true) && !is_dir('/var/log/API/')) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', '/var/log/API/'));
         }
         $time = date('D M j G:i:s');
         file_put_contents("/var/log/API/error.log", "[$time] " . $message);
