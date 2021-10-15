@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger\Api\Methods;
 
 use Eviger\Api\Tools\Other;
@@ -47,11 +49,9 @@ class User
 
                 return Other::generateJson(["response" => ["status" => "ok", "token" => $token]]);
 
-            } else {
-
-                return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
-
             }
+
+            return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
 
         } catch (Exception $e) {
             Other::log($e->getMessage());
@@ -124,11 +124,9 @@ class User
             Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
             return Other::generateJson(["response" => ["status" => "ok"]]);
 
-        } else {
-
-            return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
-
         }
+
+        return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
 
     }
 
@@ -142,7 +140,7 @@ class User
 
         $salt = Database::getInstance()->query("SELECT password_salt FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['password_salt'];
 
-        if (md5($password . $salt) == Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) {
+        if (md5($password . $salt) === Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) {
 
             if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 
@@ -151,22 +149,18 @@ class User
                 $dataOfBannedProfile = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['eid']);
                 return Other::generateJson(["response" => ["error" => "account banned", "details" => ["reason" => $dataOfBannedProfile->fetchAssoc()['reason'], "canRestore" => (time() > $dataOfBannedProfile->fetchAssoc()['time_unban'])]]]);
 
-            } else {
-
-                $token = Database::getInstance()->query("SELECT * FROM eviger_tokens WHERE eid = ?i", Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['id'])->fetchAssoc()['token'];
-
-                Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
-                Database::getInstance()->query("INSERT INTO eviger_attempts_auth (login, time, auth_ip) VALUES ('?s', ?i, '?s')", $login, time(), $_SERVER['REMOTE_ADDR']);
-
-                return Other::generateJson(["response" => ["status" => "ok", "token" => $token]]);
-
             }
 
-        } else {
+            $token = Database::getInstance()->query("SELECT * FROM eviger_tokens WHERE eid = ?i", Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['id'])->fetchAssoc()['token'];
 
-            return Other::generateJson(["response" => ["error" => "invalid login or password"]]);
+            Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
+            Database::getInstance()->query("INSERT INTO eviger_attempts_auth (login, time, auth_ip) VALUES ('?s', ?i, '?s')", $login, time(), $_SERVER['REMOTE_ADDR']);
+
+            return Other::generateJson(["response" => ["status" => "ok", "token" => $token]]);
 
         }
+
+        return Other::generateJson(["response" => ["error" => "invalid login or password"]]);
 
     }
 
