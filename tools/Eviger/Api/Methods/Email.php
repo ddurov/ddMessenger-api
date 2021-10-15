@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger\Api\Methods;
 
 use Eviger\Api\Tools\Other;
@@ -68,21 +70,17 @@ class Email
 
             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s' AND code = '?s'", $email, $code)->getNumRows()) {
 
-                if ($hash == Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) {
+                if ($hash === Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) {
 
                     return Other::generateJson(["response" => true]);
 
-                } else {
-
-                    return Other::generateJson(["response" => ["error" => "incorrect hash"]]);
-
                 }
 
-            } else {
-
-                return Other::generateJson(["response" => ["error" => "incorrect code"]]);
+                return Other::generateJson(["response" => ["error" => "incorrect hash"]]);
 
             }
+
+            return Other::generateJson(["response" => ["error" => "incorrect code"]]);
 
         } catch (Exception $e) {
             Other::log($e->getMessage());
