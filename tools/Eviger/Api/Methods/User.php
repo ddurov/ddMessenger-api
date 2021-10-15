@@ -116,9 +116,13 @@ class User
 
         if ($getCodeEmailStatus['response'] === true) {
 
-            if (preg_match("/^e?id+[\d]+/gu", $newName)) die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+            if (preg_match("/^e?id+[\d]+/u", $newName)) {
+                die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+            }
 
-            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) return Other::generateJson(["response" => ["error" => "username is busy"]]);
+            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) {
+                return Other::generateJson(["response" => ["error" => "username is busy"]]);
+            }
 
             Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
             Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
