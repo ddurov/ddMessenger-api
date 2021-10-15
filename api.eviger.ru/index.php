@@ -4,6 +4,8 @@ header('Access-Control-Allow-Origin: *');
 
 require_once "vendor/autoload.php";
 
+use Eviger\Api\DTO\Response;
+use Eviger\Api\DTO\Status\Success;
 use Eviger\Api\Methods\Email;
 use Eviger\Api\Methods\Messages;
 use Eviger\Api\Methods\Service;
@@ -261,23 +263,45 @@ switch ($method) {
         switch ($mixedData['method']) {
 
             case 'get':
-                if (!isset($mixedData['id'])) die(Users::get($mixedData['token']));
-
-                die(Users::get($mixedData['token']));
-
-            case 'search':
-                if (isset($mixedData['query']) && $mixedData['query'] !== "") {
-
-                    die(Users::search($mixedData['query']));
-
-                } else {
-
-                    die(Other::generateJson(["response" => []]));
-
+                $response = new Response;
+                if (!isset($mixedData['id'])) {
+                    try {
+                        $response->setStatus(new Success)->setResponse(Users::get($mixedData['token']));
+//                        die(Users::get($mixedData['token'])->toJson());
+                    } catch (Error $e) {
+                        $response->setStatus(new \Eviger\Api\DTO\Status\Error($e->getMessage()));
+//                        Other::generateJson()
+                    }
+                    $response->send();
                 }
 
+                $response
+                    ->setStatus(new Success)
+                    ->setResponse(Users::get($mixedData['token']))
+                    ->send();
+                break;
+
+            case 'search':
+                $response = new Response;
+                if (isset($mixedData['query']) && $mixedData['query'] !== "") {
+                    $response
+                        ->setStatus(new Success)
+                        ->setResponse(Users::search($mixedData['query']))
+                        ->send();
+                }
+
+                $response
+                    ->setStatus(new Success)
+                    ->setResponse([])
+                    ->send();
+                break;
+
             default:
-                die(Other::generateJson(["response" => ["error" => "unknown sub-method", "parameters" => $mixedData]]));
+                $response = new Response;
+                $response
+                    ->setStatus(new \Eviger\Api\DTO\Status\Error("unknown sub-method"))
+                    ->setResponse(["parameters" => $mixedData])
+                    ->send();
 
         }
 
