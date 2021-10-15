@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger\Api\Methods;
 
 use Eviger\Api\Tools\Other;
@@ -44,15 +46,13 @@ class Messages
 
                 return Other::generateJson(["response" => ["id" => (int)$local_id_message]]);
 
-            } else {
-
-                Database::getInstance()->query("INSERT INTO eviger.eviger_dialogs (peers, last_message_sender, last_message_id, last_message_date, last_message) VALUES ('?s', ?i, 1, ?i, '?s')", $myId . "," . $toIdParsed, $myId, $time, Other::encryptMessage($text));
-
-                Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', 1, ?i, ?i, '?s', ?i)", $myId . "," . $toIdParsed, $myId, $toIdParsed, Other::encryptMessage($text), $time);
-
-                return Other::generateJson(["response" => ["id" => 1]]);
-
             }
+
+            Database::getInstance()->query("INSERT INTO eviger.eviger_dialogs (peers, last_message_sender, last_message_id, last_message_date, last_message) VALUES ('?s', ?i, 1, ?i, '?s')", $myId . "," . $toIdParsed, $myId, $time, Other::encryptMessage($text));
+
+            Database::getInstance()->query("INSERT INTO eviger.eviger_messages (peers, local_id_message, out_id, peer_id, message, date) VALUES ('?s', 1, ?i, ?i, '?s', ?i)", $myId . "," . $toIdParsed, $myId, $toIdParsed, Other::encryptMessage($text), $time);
+
+            return Other::generateJson(["response" => ["id" => 1]]);
 
         } catch (Exception $e) {
             Other::log($e->getMessage());
@@ -73,7 +73,9 @@ class Messages
 
             $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-            if (!$selectAllOfUserObject->getNumRows()) return Other::generateJson(["response" => ["error" => "id incorrect"]]);
+            if (!$selectAllOfUserObject->getNumRows()) {
+                return Other::generateJson(["response" => ["error" => "id incorrect"]]);
+            }
 
             $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
 
@@ -86,9 +88,7 @@ class Messages
             $dataArray = [];
 
             while ($data_parsed = $data->fetchAssoc()) {
-
                 $dataArray[] = ["id" => (int)$data_parsed['local_id_message'], "out" => $data_parsed['out_id'] == Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'], "message" => Other::decryptMessage($data_parsed['message']), "date" => (int)$data_parsed['date']];
-
             }
 
             return Other::generateJson(["response" => $dataArray]);
@@ -113,9 +113,7 @@ class Messages
             $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE peers LIKE '%?S%' ORDER BY last_message_date DESC", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
 
             while ($data_parsed = $data->fetchAssoc()) {
-
                 $dataArray[] = ["last_message_id" => $data_parsed['last_message_id'], "last_message_sender" => $data_parsed['last_message_sender'], "creator_dialog_id" => (int)explode(",", $data_parsed['peers'])[0], "peer_id" => (int)explode(",", $data_parsed['peers'])[1], "date" => $data_parsed['last_message_date'], "message" => Other::decryptMessage($data_parsed['last_message'])];
-
             }
 
             return Other::generateJson(["response" => $dataArray]);
