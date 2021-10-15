@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Eviger\Api\DTO\Status;
 
+use Eviger\Contracts\ArrayInterface;
 use Eviger\Contracts\StatusInterface;
 
 class Success implements StatusInterface
@@ -36,5 +37,17 @@ class Success implements StatusInterface
     public function __toString(): string
     {
         return $this->getMessage();
+    }
+
+    public function toArray(): array
+    {
+        return
+            [
+                "error" =>
+                    [
+                        "code" => $this->getCode(),
+                        "message" => $this->getMessage()
+                    ]
+            ];
     }
 }

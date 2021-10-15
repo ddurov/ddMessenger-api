@@ -6,4 +6,8 @@ namespace Eviger\Api\DTO\Status;
 
 class Error extends Success
 {
+    public function toArray(): array
+    {
+        return ["response"];
+    }
 }

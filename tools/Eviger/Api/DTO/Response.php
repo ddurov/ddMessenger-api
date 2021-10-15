@@ -61,18 +61,11 @@ class Response implements JsonInterface, ArrayInterface, Stringable
 
     public function toArray(): array
     {
-        if ($this->getStatus() instanceof Error) {
-            return
-                [
-                    "error" =>
-                        [
-                            "code" => $this->status->getCode(),
-                            "message" => $this->status->getMessage()
-                        ]
-                ];
+        $status = $this->getStatus()->toArray();
+        if (isset($response["response"])) {
+            $status["response"] = $this->getResponse();
         }
-
-        return ["response" => $this->getResponse()];
+        return $status;
     }
 
     public function __toString(): string
