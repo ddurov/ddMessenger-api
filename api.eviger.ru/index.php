@@ -2,7 +2,7 @@
 
 header('Access-Control-Allow-Origin: *');
 
-require_once "../tools/vendor/autoload.php";
+require_once "vendor/autoload.php";
 
 use Eviger\Api\Methods\Email;
 use Eviger\Api\Methods\Messages;

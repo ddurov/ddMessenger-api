@@ -2,7 +2,7 @@
     "name": "eviger/api",
     "autoload": {
         "psr-4": {
-            "Eviger\\": "Eviger/"
+            "Eviger\\": "tools/Eviger/"
         }
     },
     "authors": [
