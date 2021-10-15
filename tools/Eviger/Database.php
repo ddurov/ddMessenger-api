@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eviger;
 
 use Eviger\Contracts\Singleton;
