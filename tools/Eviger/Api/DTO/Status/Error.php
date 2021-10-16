@@ -8,6 +8,13 @@ class Error extends Success
 {
     public function toArray(): array
     {
-        return ["response"];
+        return
+            [
+                "error" =>
+                    [
+                        "code" => $this->getCode(),
+                        "message" => $this->getMessage()
+                    ]
+            ];
     }
 }

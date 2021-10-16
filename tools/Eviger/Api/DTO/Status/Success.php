@@ -41,13 +41,6 @@ class Success implements StatusInterface
 
     public function toArray(): array
     {
-        return
-            [
-                "error" =>
-                    [
-                        "code" => $this->getCode(),
-                        "message" => $this->getMessage()
-                    ]
-            ];
+        return ["response"];
     }
 }
