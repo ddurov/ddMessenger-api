@@ -17,9 +17,12 @@
     ],
     "require": {
         "ext-curl": "*",
-        "php": "7.4.23",
+        "php": "7.4.*",
         "krugozor/database": "^2.0",
         "phpmailer/phpmailer": "^6.4",
-        "mobiledetect/mobiledetectlib": "^2.8"
+        "mobiledetect/mobiledetectlib": "^2.8",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*"
     }
 }

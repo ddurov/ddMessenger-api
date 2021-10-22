@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Eviger\Api\Methods;
 
-use Error;
-use Eviger\Api\DTO\Get;
-use Eviger\Api\Tools\Other;
+use Eviger\Api\DTO\Response;
+use Eviger\Api\DTO\selfThrows;
 use Eviger\Database;
 
 class Users
@@ -15,77 +14,65 @@ class Users
     /**
      * @param string $token
      * @param string|null $id
-     * @return Get
-     * @throws Error
+     * @return string
+     * @throws selfThrows
      */
-    public static function get(string $token, ?string $id = NULL): Get
+    public static function get(string $token, ?string $id = NULL): string
     {
         if ($id === NULL) {
 
-            return (new Get)
-                ->setEid((int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])
-                ->setUsername((string)Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['username'])
-                ->setLastSeen((int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['lastSeen'])
-                ->setEmail(Database::getInstance()->query("SELECT email FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['email'])
-            ;
-//            return Other::generateJson(
-//                ["response" => [
-//                    "eid" => (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'],
-//                    "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['username'],
-//                    "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['lastSeen'],
-//                    "email" => Database::getInstance()->query("SELECT email FROM eviger.eviger_users WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->fetchAssoc()['email']
-//                ]
-//                ]);
+            $idByToken = (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
+
+            return (new Response)
+                ->setStatus("ok")
+                ->setResponse([
+                    "eid" => $idByToken,
+                    "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idByToken)->fetchAssoc()['username'],
+                    "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idByToken)->fetchAssoc()['lastSeen'],
+                    "email" => Database::getInstance()->query("SELECT email FROM eviger.eviger_users WHERE id = ?i", $idByToken)->fetchAssoc()['email']
+                ])
+                ->toJson();
 
         }
 
         $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-        if (!$selectAllOfUserObject->getNumRows()) {
-            return throw new Error("Id is incorrect");
-//            return Other::generateJson(["response" => ["error" => "id incorrect"]]);
-        }
+        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id invalid"]);
 
         $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
 
-        return (new Get())
-            ->setEid((int)$idParsed)
-            ->setUsername(Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'])
-            ->setLastSeen((int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']);
-//
-//        return Other::generateJson(
-//            [
-//                "response" => [
-//                    "eid" => (int)$idParsed,
-//                    "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'],
-//                    "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']
-//                ]
-//            ]);
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse([
+                "eid" => $idParsed,
+                "username" => Database::getInstance()->query("SELECT username FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['username'],
+                "lastSeen" => (int)Database::getInstance()->query("SELECT lastSeen FROM eviger.eviger_users WHERE id = ?i", $idParsed)->fetchAssoc()['lastSeen']
+            ])
+            ->toJson();
     }
 
     /**
      * @param string $query
-     * @return Get[]
+     * @return string
      */
-    public static function search(string $query): array
+    public static function search(string $query): string
     {
-        /** @var Get[] $dataFromDatabase */
         $dataFromDatabase = [];
-        $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username LIKE '%?S%'", $query);
+        $dataNotParsed = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username LIKE \"%?S%\"", $query);
 
-        while ($data_parsed = $data->fetchAssoc()) {
+        while ($dataParsed = $dataNotParsed->fetchAssoc()) {
 
-            $dataFromDatabase[] = (new Get)
-                ->setEid((int)$data_parsed['id'])
-                ->setUsername($data_parsed['username'])
-                ->setLastSeen((int)$data_parsed['lastSeen']);
-//            $dataFromDatabase[] = ["eid" => (int)$data_parsed['id'],
-//                "username" => $data_parsed['username'],
-//                "lastSeen" => (int)$data_parsed['lastSeen']];
+            $dataFromDatabase[] = [
+                "eid" => (int)$dataParsed['id'],
+                "username" => $dataParsed['username'],
+                "lastSeen" => (int)$dataParsed['lastSeen']
+            ];
 
         }
 
-        return $dataFromDatabase;
-//        return Other::generateJson(["response" => $a]);
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse([[$dataFromDatabase]])
+            ->toJson();
     }
 }

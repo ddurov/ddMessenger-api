@@ -11,3 +11,5 @@ SetEnv DATABASE_NAME name
 SetEnv MAIL_SERVER localhost
 SetEnv MAIL_LOGIN user
 SetEnv MAIL_PASSWORD password
+
+SetEnv hashKey key

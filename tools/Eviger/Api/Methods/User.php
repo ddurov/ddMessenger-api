@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Eviger\Api\Methods;
 
+use Eviger\Api\DTO\Response;
+use Eviger\Api\DTO\selfThrows;
 use Eviger\Api\Tools\Other;
 use Eviger\Database;
 use Exception;
@@ -19,44 +21,41 @@ class User
      * @param string $emailCode
      * @param string $hashCode
      * @return string
+     * @throws Exception
      */
     public static function registerAccount(string $login, string $password, string $email, ?string $username, string $emailCode, string $hashCode): string
     {
 
-        try {
+        $salt = bin2hex(random_bytes(8));
+        $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
 
-            $salt = bin2hex(random_bytes(8));
-            $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
+        if ($getCodeEmailStatus['response'] === true) {
 
-            if ($getCodeEmailStatus['response'] === true) {
+            $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
 
-                $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
+            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
+            Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
 
-                Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
-                Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
+            if ($username !== null) {
 
-                if ($username !== null) {
+                Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, $username, $email);
 
-                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, $username, $email);
+            } else {
 
-                } else {
-
-                    Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, "eid".Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $email);
-
-                }
-
-                Database::getInstance()->query("INSERT INTO eviger_tokens (eid, token) VALUES (?i, '?s')", (int)Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['id'], $token);
-
-                return Other::generateJson(["response" => ["status" => "ok", "token" => $token]]);
+                Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, "eid" . Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $email);
 
             }
 
-            return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
+            Database::getInstance()->query("INSERT INTO eviger_tokens (eid, token) VALUES (?i, '?s')", (int)Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['id'], $token);
 
-        } catch (Exception $e) {
-            Other::log($e->getMessage());
-            return "Internal error";
+            return (new Response)
+                ->setStatus("ok")
+                ->setResponse(["token" => $token])
+                ->toJson();
+
         }
+
+        return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
 
     }
 
@@ -64,24 +63,23 @@ class User
      * @param string $email
      * @param string $newPassword
      * @return string
+     * @throws Exception
      */
     public static function restorePassword(string $email, string $newPassword): string
     {
 
-        try {
+        $salt = bin2hex(random_bytes(8));
+        $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
+        $idAccount = Database::getInstance()->query("SELECT id FROM eviger_users WHERE email = '?s'", $email)->fetchAssoc()['id'];
 
-            $salt = bin2hex(random_bytes(8));
-            $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
-            $idAccount = Database::getInstance()->query("SELECT id FROM eviger_users WHERE email = '?s'", $email)->fetchAssoc()['id'];
-            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
-            Database::getInstance()->query("UPDATE eviger_users SET password_hash = '?s', password_salt = '?s' WHERE id = ?i", md5($newPassword . $salt), $salt, $idAccount);
-            Database::getInstance()->query("UPDATE eviger_tokens SET token = '?s' WHERE eid = ?i", $token, $idAccount);
-            return Other::generateJson(["response" => ["status" => "ok", "newToken" => $token]]);
+        Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
+        Database::getInstance()->query("UPDATE eviger_users SET password_hash = '?s', password_salt = '?s' WHERE id = ?i", md5($newPassword . $salt), $salt, $idAccount);
+        Database::getInstance()->query("UPDATE eviger_tokens SET token = '?s' WHERE eid = ?i", $token, $idAccount);
 
-        } catch (Exception $e) {
-            Other::log($e->getMessage());
-            return "Internal error";
-        }
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse(["newToken" => $token])
+            ->toJson();
 
     }
 
@@ -93,7 +91,7 @@ class User
     {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1, lastSendedOnline = ?i WHERE id = ?i", time(), Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
-        return Other::generateJson(["response" => ["status" => "ok"]]);
+        return (new Response)->setStatus("ok")->toJson();
 
     }
 
@@ -105,10 +103,13 @@ class User
     {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1 WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
-        return Other::generateJson(["response" => ["status" => "ok"]]);
+        return (new Response)->setStatus("ok")->toJson();
 
     }
 
+    /**
+     * @throws selfThrows
+     */
     public static function changeName(string $newName, string $email, string $codeEmail, string $hashCode): string
     {
 
@@ -117,16 +118,18 @@ class User
         if ($getCodeEmailStatus['response'] === true) {
 
             if (preg_match("/^e?id+[\d]+/u", $newName)) {
-                die(Other::generateJson(["response" => ["error" => "username cannot contain the prefix eid or id"]]));
+                throw new selfThrows(["message" => "username cannot contain the prefix eid or id"]);
             }
 
             if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) {
-                return Other::generateJson(["response" => ["error" => "username is busy"]]);
+                throw new selfThrows(["message" => "username is busy"]);
             }
 
             Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
             Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
-            return Other::generateJson(["response" => ["status" => "ok"]]);
+            return (new Response)
+                ->setStatus("ok")
+                ->toJson();
 
         }
 
@@ -138,33 +141,33 @@ class User
      * @param string $login
      * @param string $password
      * @return string
+     * @throws selfThrows
      */
     public static function auth(string $login, string $password): string
     {
 
         $salt = Database::getInstance()->query("SELECT password_salt FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['password_salt'];
 
-        if (md5($password . $salt) === Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) {
+        if (md5($password . $salt) !== Database::getInstance()->query("SELECT password_hash FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['password_hash']) throw new selfThrows(["message" => "invalid login or password"]);
 
-            if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
+        if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 
-                // TODO: Ban user
+            // TODO: Ban user
 
-                $dataOfBannedProfile = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['eid']);
-                return Other::generateJson(["response" => ["error" => "account banned", "details" => ["reason" => $dataOfBannedProfile->fetchAssoc()['reason'], "canRestore" => (time() > $dataOfBannedProfile->fetchAssoc()['time_unban'])]]]);
-
-            }
-
-            $token = Database::getInstance()->query("SELECT * FROM eviger_tokens WHERE eid = ?i", Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['id'])->fetchAssoc()['token'];
-
-            Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
-            Database::getInstance()->query("INSERT INTO eviger_attempts_auth (login, time, auth_ip) VALUES ('?s', ?i, '?s')", $login, time(), $_SERVER['REMOTE_ADDR']);
-
-            return Other::generateJson(["response" => ["status" => "ok", "token" => $token]]);
+            // $dataOfBannedProfile = Database::getInstance()->query("SELECT * FROM eviger.eviger_bans WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['eid']);
+            // return Other::generateJson(["response" => ["error" => "account banned", "details" => ["reason" => $dataOfBannedProfile->fetchAssoc()['reason'], "canRestore" => (time() > $dataOfBannedProfile->fetchAssoc()['time_unban'])]]]);
 
         }
 
-        return Other::generateJson(["response" => ["error" => "invalid login or password"]]);
+        $token = Database::getInstance()->query("SELECT * FROM eviger_tokens WHERE eid = ?i", Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $_GET['login'])->fetchAssoc()['id'])->fetchAssoc()['token'];
+
+        Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
+        Database::getInstance()->query("INSERT INTO eviger_attempts_auth (login, time, auth_ip) VALUES ('?s', ?i, '?s')", $login, time(), $_SERVER['REMOTE_ADDR']);
+
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse(["token" => $token])
+            ->toJson();
 
     }
 

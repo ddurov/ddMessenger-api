@@ -3,38 +3,50 @@ declare(strict_types=1);
 
 namespace Eviger\Api\DTO;
 
-use Eviger\Api\DTO\Status\Error;
-use Eviger\Contracts\ArrayInterface;
-use Eviger\Contracts\JsonInterface;
-use Eviger\Contracts\StatusInterface;
-use Eviger\Contracts\Stringable;
-
-class Response implements JsonInterface, ArrayInterface, Stringable
+class Response
 {
-    private StatusInterface $status;
+    private string $status;
     private array $response;
 
+    /**
+     * @return string
+     */
     public function toJson(): string
     {
-        return json_encode($this->toArray());
+        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * @return StatusInterface
-     */
-    public function getStatus(): StatusInterface
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param StatusInterface $status
+     * @param string $status
      * @return Response
      */
-    public function setStatus(StatusInterface $status): Response
+    public function setStatus(string $status): Response
     {
         $this->status = $status;
         return $this;
+    }
+
+    /**
+     * @param array $response
+     * @return Response
+     */
+    public function setResponse(array $response): Response
+    {
+        $this->response = $response;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
+
+    public function send(): void
+    {
+        die(self::toJson());
     }
 
     /**
@@ -46,35 +58,10 @@ class Response implements JsonInterface, ArrayInterface, Stringable
     }
 
     /**
-     * @param array|ArrayInterface $response
-     * @return Response
+     * @return string
      */
-    public function setResponse($response): Response
+    public function getStatus(): string
     {
-        if ($response instanceof ArrayInterface) {
-            $response = $response->toArray();
-        }
-
-        $this->response = $response;
-        return $this;
-    }
-
-    public function toArray(): array
-    {
-        $status = $this->getStatus()->toArray();
-        if (isset($response["response"])) {
-            $status["response"] = $this->getResponse();
-        }
-        return $status;
-    }
-
-    public function __toString(): string
-    {
-        return $this->toJson();
-    }
-
-    public function send(): void
-    {
-        die($this->toJson());
+        return $this->status;
     }
 }

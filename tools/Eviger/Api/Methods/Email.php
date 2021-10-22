@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Eviger\Api\Methods;
 
-use Eviger\Api\Tools\Other;
+use Eviger\Api\DTO\Response;
+use Eviger\Api\DTO\selfThrows;
 use Eviger\Database;
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -16,44 +17,43 @@ class Email
      * @param string $email
      * @param PHPMailer $mail
      * @return string
+     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws selfThrows
+     * @throws Exception
      */
     public static function createCode(string $email, PHPMailer $mail): string
     {
 
-        try {
+        if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $email)) throw new selfThrows(["message" => "email incorrect"]);
 
-            if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $email)) return Other::generateJson(["response" => ["error" => "email incorrect"]]);
+        if (preg_match("/(.*)?eviger\.ru/isu", $email)) throw new selfThrows(["message" => "email must not contain domains of any level eviger.ru"]);
 
-            if (preg_match("/(.*)?eviger\.ru/isu", $email)) return Other::generateJson(["response" => ["error" => "email must not contain domains of any level eviger.ru"]]);
+        $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
+        $hash = md5($code . "|" . bin2hex(random_bytes(8)));
 
-            $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
-            $hash = md5($code . "|" . bin2hex(random_bytes(8)));
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
+            if ((time() - Database::getInstance()->query("SELECT date_request FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request']) < 300 || Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE ip_request = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "cooldown"]);
 
-            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
-                if ((time() - Database::getInstance()->query("SELECT date_request FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request']) < 300 || Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE ip_request = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) return Other::generateJson(["response" => ["error" => "cooldown"]]);
-
-                Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', date_request = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
-            } else {
-                Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
-            }
-
-            $mail->setFrom(getenv("USER_MAIL_DOMAIN"));
-            $mail->addAddress($email);
-
-            $mail->isHTML(true);
-            $mail->Subject = "Подтверждение почты";
-            $mail->Body = "Ваш код подтверждения: <b>$code</b><br><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немендленно смените пароль</b>";
-            $mail->CharSet = "UTF-8";
-            $mail->Encoding = 'base64';
-
-            $mail->send();
-
-            return Other::generateJson(["response" => ["status" => "ok", "hash" => $hash]]);
-
-        } catch (Exception $e) {
-            Other::log($e->getMessage());
-            return "Internal error";
+            Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', date_request = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
+        } else {
+            Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
         }
+
+        $mail->setFrom(getenv("USER_MAIL_DOMAIN"));
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->Subject = "Подтверждение почты";
+        $mail->Body = 'Ваш код подтверждения: <b>$code</b><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немендленно смените пароль</b>';
+        $mail->CharSet = "UTF-8";
+        $mail->Encoding = "base64";
+
+        $mail->send();
+
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse(["hash" => $hash])
+            ->toJson();
 
     }
 
@@ -62,30 +62,19 @@ class Email
      * @param string $code
      * @param string $hash
      * @return string
+     * @throws selfThrows
      */
     public static function confirmCode(string $email, string $code, string $hash): string
     {
 
-        try {
+        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s' AND code = '?s'", $email, $code)->getNumRows()) throw new selfThrows(["message" => "invalid hash"]);
 
-            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s' AND code = '?s'", $email, $code)->getNumRows()) {
+        if ($hash !== Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) throw new selfThrows(["message" => "invalid hash"]);
 
-                if ($hash === Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) {
-
-                    return Other::generateJson(["response" => true]);
-
-                }
-
-                return Other::generateJson(["response" => ["error" => "incorrect hash"]]);
-
-            }
-
-            return Other::generateJson(["response" => ["error" => "incorrect code"]]);
-
-        } catch (Exception $e) {
-            Other::log($e->getMessage());
-            return "Internal error";
-        }
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse([true])
+            ->toJson();
 
     }
 
