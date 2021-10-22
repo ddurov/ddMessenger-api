@@ -2,9 +2,9 @@
 
 require_once "vendor/autoload.php";
 
-use Eviger\Database;
+// database already use this methods more effectivity
 
-if ($argv[1] == "removeOldAttemptsOfAuth") {
+/*if ($argv[1] == "removeOldAttemptsOfAuth") {
 
     $data = Database::getInstance()->query("SELECT * FROM eviger_attempts_auth");
 
@@ -28,4 +28,4 @@ if ($argv[1] == "removeOldAttemptsOfAuth") {
 
     //TODO: anything
 
-}
+}*/
