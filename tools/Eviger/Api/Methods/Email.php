@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Eviger\Api\Methods;
@@ -31,8 +30,10 @@ class Email
         $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
         $hash = md5($code . "|" . bin2hex(random_bytes(8)));
 
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE ip_request = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "cooldown"]);
+
         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
-            if ((time() - Database::getInstance()->query("SELECT date_request FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request']) < 300 || Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE ip_request = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "cooldown"]);
+            if (time() - Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request'] > 300) throw new selfThrows(["message" => "cooldown"]);
 
             Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', date_request = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
         } else {
