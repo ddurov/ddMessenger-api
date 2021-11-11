@@ -1,8 +1,8 @@
 <?php
 
-require_once "vendor/autoload.php";
+//require_once "vendor/autoload.php";
 
-// database already use this methods more effectivity
+// database already use these methods more effectivity
 
 /*if ($argv[1] == "removeOldAttemptsOfAuth") {
 
