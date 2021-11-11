@@ -6,7 +6,7 @@ namespace Eviger\Api\DTO;
 class Response
 {
     private string $status;
-    private array $response;
+    private $response;
 
     /**
      * @return string
@@ -27,10 +27,10 @@ class Response
     }
 
     /**
-     * @param array $response
+     * @param array|bool $response
      * @return Response
      */
-    public function setResponse(array $response): Response
+    public function setResponse($response): Response
     {
         $this->response = $response;
         return $this;
@@ -50,7 +50,7 @@ class Response
     }
 
     /**
-     * @return array
+     * @return array|bool
      */
     public function getResponse(): array
     {

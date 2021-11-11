@@ -6,9 +6,9 @@ namespace Eviger\Api\Methods;
 
 use Eviger\Api\DTO\Response;
 use Eviger\Api\DTO\selfThrows;
-use Eviger\Api\Tools\Other;
 use Eviger\Database;
 use Exception;
+use Krugozor\Database\MySqlException;
 use Mobile_Detect;
 
 class User
@@ -29,33 +29,29 @@ class User
         $salt = bin2hex(random_bytes(8));
         $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
 
-        if ($getCodeEmailStatus['response'] === true) {
+        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']]);
 
-            $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
+        $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
 
-            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
-            Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
+        Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
+        Database::getInstance()->query("INSERT INTO eviger_sessions (login, date_auth, session_type_device, ip_device) VALUES ('?s', ?i, ?i, '?s')", $login, time(), ((new Mobile_Detect)->isMobile() || (new Mobile_Detect)->isTablet()) ? 2 : 1, $_SERVER['REMOTE_ADDR']);
 
-            if ($username !== null) {
+        if ($username !== null) {
 
-                Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, $username, $email);
+            Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, $username, $email);
 
-            } else {
+        } else {
 
-                Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, "eid" . Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows(), $email);
-
-            }
-
-            Database::getInstance()->query("INSERT INTO eviger_tokens (eid, token) VALUES (?i, '?s')", (int)Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['id'], $token);
-
-            return (new Response)
-                ->setStatus("ok")
-                ->setResponse(["token" => $token])
-                ->toJson();
+            Database::getInstance()->query("INSERT INTO eviger_users (login, password_hash, password_salt, username, email) VALUES ('?s', '?s', '?s', '?s', '?s')", $login, md5($password . $salt), $salt, "eid" . (Database::getInstance()->query("SELECT * FROM eviger_users")->getNumRows() + 1), $email);
 
         }
 
-        return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
+        Database::getInstance()->query("INSERT INTO eviger_tokens (eid, token) VALUES (?i, '?s')", (int)Database::getInstance()->query("SELECT id FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['id'], $token);
+
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse(["token" => $token])
+            ->toJson();
 
     }
 
@@ -78,7 +74,7 @@ class User
 
         return (new Response)
             ->setStatus("ok")
-            ->setResponse(["newToken" => $token])
+            ->setResponse(["token" => $token])
             ->toJson();
 
     }
@@ -86,54 +82,58 @@ class User
     /**
      * @param string $token
      * @return string
+     * @throws MySqlException
      */
     public static function setOnline(string $token): string
     {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1, lastSendedOnline = ?i WHERE id = ?i", time(), Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
-        return (new Response)->setStatus("ok")->toJson();
+        return (new Response)
+            ->setStatus("ok")
+            ->toJson();
 
     }
 
     /**
      * @param string $token
      * @return string
+     * @throws MySqlException
      */
     public static function setOffline(string $token): string
     {
 
         Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1 WHERE id = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
-        return (new Response)->setStatus("ok")->toJson();
+        return (new Response)
+            ->setStatus("ok")
+            ->toJson();
 
     }
 
+
     /**
-     * @throws selfThrows
+     * @param string $newName
+     * @param string $email
+     * @param string $codeEmail
+     * @param string $hashCode
+     * @return string
+     * @throws selfThrows|MySqlException
      */
     public static function changeName(string $newName, string $email, string $codeEmail, string $hashCode): string
     {
 
         $getCodeEmailStatus = json_decode(Email::confirmCode($email, $codeEmail, $hashCode), true);
 
-        if ($getCodeEmailStatus['response'] === true) {
+        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']]);
 
-            if (preg_match("/^e?id+[\d]+/u", $newName)) {
-                throw new selfThrows(["message" => "username cannot contain the prefix eid or id"]);
-            }
+        if (preg_match("/^e?id+[\d]+/u", $newName)) throw new selfThrows(["message" => "newName cannot contain the prefix eid or id"]);
 
-            if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) {
-                throw new selfThrows(["message" => "username is busy"]);
-            }
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) throw new selfThrows(["message" => "newName is busy"]);
 
-            Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
-            Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
-            return (new Response)
-                ->setStatus("ok")
-                ->toJson();
-
-        }
-
-        return Other::generateJson(["response" => ["error" => $getCodeEmailStatus['response']['error']]]);
+        Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
+        Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);
+        return (new Response)
+            ->setStatus("ok")
+            ->toJson();
 
     }
 
@@ -141,7 +141,7 @@ class User
      * @param string $login
      * @param string $password
      * @return string
-     * @throws selfThrows
+     * @throws selfThrows|MySqlException
      */
     public static function auth(string $login, string $password): string
     {

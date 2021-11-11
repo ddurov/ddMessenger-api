@@ -7,6 +7,7 @@ namespace Eviger\Api\Methods;
 use Eviger\Api\DTO\Response;
 use Eviger\Api\DTO\selfThrows;
 use Eviger\Database;
+use Krugozor\Database\MySqlException;
 
 class Users
 {
@@ -15,7 +16,7 @@ class Users
      * @param string $token
      * @param string|null $id
      * @return string
-     * @throws selfThrows
+     * @throws selfThrows|MySqlException
      */
     public static function get(string $token, ?string $id = NULL): string
     {
@@ -39,7 +40,7 @@ class Users
 
         if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id invalid"]);
 
-        $idParsed = $selectAllOfUserObject->fetchAssoc()['id'];
+        $idParsed = (int)$selectAllOfUserObject->fetchAssoc()['id'];
 
         return (new Response)
             ->setStatus("ok")
@@ -54,6 +55,7 @@ class Users
     /**
      * @param string $query
      * @return string
+     * @throws MySqlException
      */
     public static function search(string $query): string
     {
@@ -72,7 +74,7 @@ class Users
 
         return (new Response)
             ->setStatus("ok")
-            ->setResponse([[$dataFromDatabase]])
+            ->setResponse($dataFromDatabase)
             ->toJson();
     }
 }

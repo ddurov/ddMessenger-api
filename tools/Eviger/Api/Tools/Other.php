@@ -6,19 +6,11 @@ namespace Eviger\Api\Tools;
 
 use Eviger\Api\DTO\selfThrows;
 use Eviger\Database;
+use Krugozor\Database\MySqlException;
 use RuntimeException;
 
 class Other
 {
-
-    /**
-     * @param array $array
-     * @return string
-     */
-    public static function generateJson(array $array): string
-    {
-        return json_encode($array, JSON_UNESCAPED_UNICODE);
-    }
 
     /**
      * @param string $message
@@ -26,10 +18,10 @@ class Other
      */
     public static function encryptMessage(string $message): string
     {
-        $ivlen = openssl_cipher_iv_length($cipher = "AES-128-CBC");
-        $iv = openssl_random_pseudo_bytes($ivlen);
-        $ciphertext_raw = openssl_encrypt($message, $cipher, getenv("hashKey"), OPENSSL_RAW_DATA, $iv);
-        $hmac = hash_hmac('sha256', $ciphertext_raw, getenv("hashKey"), true);
+        $ivLength = openssl_cipher_iv_length($cipher = "aes-128-cbc");
+        $iv = openssl_random_pseudo_bytes($ivLength);
+        $ciphertext_raw = openssl_encrypt($message, $cipher, getenv("HASH_KEY"), OPENSSL_RAW_DATA, $iv);
+        $hmac = hash_hmac('sha256', $ciphertext_raw, getenv("HASH_KEY"), true);
         return base64_encode($iv . $hmac . $ciphertext_raw);
     }
 
@@ -40,16 +32,17 @@ class Other
     public static function decryptMessage(string $messageEncoded): string
     {
         $c = base64_decode($messageEncoded);
-        $ivLength = openssl_cipher_iv_length($cipher = "AES-128-CBC");
+        $ivLength = openssl_cipher_iv_length($cipher = "aes-128-cbc");
         $iv = substr($c, 0, $ivLength);
-        $text_encrypted_raw = substr($c, $ivLength + 32);
-        return openssl_decrypt($text_encrypted_raw, $cipher, getenv("hashKey"), OPENSSL_RAW_DATA, $iv);
+        substr($c, $ivLength, $sha2len = 32);
+        $cipherTextRaw = substr($c, $ivLength + $sha2len);
+        return openssl_decrypt($cipherTextRaw, $cipher, getenv("HASH_KEY"), OPENSSL_RAW_DATA, $iv);
     }
 
     /**
      * @param string $token
      * @return bool
-     * @throws selfThrows
+     * @throws selfThrows|MySqlException
      */
     public static function checkToken(string $token): bool
     {
@@ -80,7 +73,7 @@ class Other
     /**
      * @param string $token
      * @return bool
-     * @throws selfThrows
+     * @throws selfThrows|MySqlException
      */
     public static function checkAdmin(string $token): bool
     {
@@ -112,30 +105,5 @@ class Other
     {
         if ($_SERVER["REQUEST_METHOD"] !== "POST") throw new selfThrows(["message" => "this method usage only POST requests"]);
         return true;
-    }
-
-    /**
-     * @param $mixedData
-     * @throws selfThrows
-     */
-    public static function local_checkLoginAndPassword($mixedData): void
-    {
-        // login checks
-
-        if (!isset($mixedData['login'])) throw new selfThrows(["message" => "login parameter is missing"]);
-
-        if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) throw new selfThrows(["message" => "the login is too big or too small"]);
-
-        if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['login'])) throw new selfThrows(["message" => "the login must contain a-z, A-Z, 0-9 and _"]);
-
-        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s'", $mixedData['login'])->getNumRows()) throw new selfThrows(["message" => "user not found"]);
-
-        // password checks
-
-        if (!isset($mixedData['password'])) throw new selfThrows(["message" => "password parameter is missing"]);
-
-        if ((mb_strlen($mixedData['password']) <= 8 || $mixedData['password'] >= 64)) throw new selfThrows(["message" => "the password is too big or too small"]);
-
-        if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['password'])) throw new selfThrows(["message" => "the password must contain a-z, A-Z, 0-9 and _"]);
     }
 }
