@@ -6,12 +6,14 @@ namespace Eviger\Api\Methods;
 
 use Eviger\Api\DTO\Response;
 use Eviger\Database;
+use Krugozor\Database\MySqlException;
 
 class Service
 {
 
     /**
      * @return string
+     * @throws MySqlException
      */
     public static function getUpdates(): string
     {
