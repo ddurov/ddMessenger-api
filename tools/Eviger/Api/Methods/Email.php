@@ -38,7 +38,7 @@ class Email
             Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
         }
 
-        mail($email, 'Подтверждение почты', "Ваш код подтверждения: <b>$code</b><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немедленно смените пароль</b>", ["From" => "no-reply@eviger.ru", "MIME-Version" => 1.0, "Content-type" => "text/html; charset=utf-8"]);
+        mail($email, "Подтверждение почты", "Ваш код подтверждения: <b>$code</b><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немедленно смените пароль</b>", ["From" => getenv("USER_MAIL_DOMAIN"), "MIME-Version" => 1.0, "Content-type" => "text/html; charset=utf-8"]);
 
         return (new Response)
             ->setStatus("ok")
