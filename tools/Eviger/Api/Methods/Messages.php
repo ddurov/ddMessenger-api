@@ -33,13 +33,9 @@ class Messages
 
         $dialogData = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE peers LIKE '%?S%'", $myId);
 
-        $foundedPeers = null;
+        $foundedPeers = ($idParsed === $myId) ? "$myId,$myId" : null;
 
         while ($dialogParsed = $dialogData->fetchAssoc()) {
-            if ($idParsed === $myId) {
-                $foundedPeers = "$myId,$myId";
-                break;
-            }
             preg_match_all("/[^$myId,]+/", $dialogParsed['peers'], $matches);
             if (isset($matches[0][0])) {
                 $foundedPeers = $dialogParsed['peers'];
@@ -60,7 +56,7 @@ class Messages
 
             $personalIdLongPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE eid = ?i", $myId)->getNumRows();
 
-            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize([$local_id_message, $myId, $idParsed, Other::encryptMessage($text), $time]));
+            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, "eventType" => 1, "objects" => ["id" => (int)$local_id_message, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
 
             return (new Response)
                 ->setStatus("ok")
@@ -75,7 +71,7 @@ class Messages
 
         $personalIdLongPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE eid = ?i", $myId)->getNumRows();
 
-        Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize([1, $myId, $idParsed, Other::encryptMessage($text), $time]));
+        Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, "eventType" => 1, "objects" => ["id" => 1, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
 
         return (new Response)
             ->setStatus("ok")
@@ -103,13 +99,9 @@ class Messages
 
         $dialogData = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE peers LIKE '%?S%'", $myId);
 
-        $foundedPeers = null;
+        $foundedPeers = ($idParsed === $myId) ? "$myId,$myId" : null;
 
         while ($dialogParsed = $dialogData->fetchAssoc()) {
-            if ($idParsed === $myId) {
-                $foundedPeers = "$myId,$myId";
-                break;
-            }
             preg_match_all("/[^$myId,]+/", $dialogParsed['peers'], $matches);
             if (isset($matches[0][0])) {
                 $foundedPeers = $dialogParsed['peers'];
@@ -125,7 +117,7 @@ class Messages
             $data = Database::getInstance()->query("SELECT * FROM eviger.eviger_messages WHERE peers = '?s'", $foundedPeers);
 
             while ($data_parsed = $data->fetchAssoc()) {
-                $dataArray[] = ["id" => (int)$data_parsed['local_id_message'], "out" => $data_parsed['out_id'] === Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'], "message" => Other::decryptMessage($data_parsed['message']), "date" => (int)$data_parsed['date']];
+                $dataArray[] = ["id" => (int)$data_parsed['local_id_message'], "out" => $data_parsed['out_id'] === Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'], "peer_id" => $data_parsed['peer_id'], "message" => Other::decryptMessage($data_parsed['message']), "date" => (int)$data_parsed['date']];
             }
 
         }
@@ -152,7 +144,7 @@ class Messages
         while ($dialogsParsed = $dialogsData->fetchAssoc()) {
             preg_match_all("/[^$myId,]+/", $dialogsParsed['peers'], $matches);
             $peer_id = $dialogsParsed['peers'] === "$myId,$myId" ? (int)$myId : (int)$matches[0][0];
-            $dataArray[] = ["peer_id" => $peer_id, "last_message_id" => (int)$dialogsParsed['last_message_id'], "last_message_sender" => (int)$dialogsParsed['last_message_sender'], "date" => (int)$dialogsParsed['last_message_date'], "message" => Other::decryptMessage($dialogsParsed['last_message'])];
+            $dataArray[] = ["id" => (int)$dialogsParsed['last_message_id'], "peer_id" => $peer_id, "out_id" => (int)$dialogsParsed['last_message_sender'], "message" => Other::decryptMessage($dialogsParsed['last_message']), "date" => (int)$dialogsParsed['last_message_date']];
         }
 
         return (new Response)

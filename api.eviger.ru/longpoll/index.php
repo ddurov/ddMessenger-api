@@ -8,6 +8,7 @@ require_once "../../vendor/autoload.php";
 
 use Eviger\Api\DTO\Response;
 use Eviger\Api\DTO\selfThrows;
+use Eviger\Api\Methods\Users;
 use Eviger\Api\Tools\Other;
 use Eviger\Database;
 
@@ -36,8 +37,36 @@ try {
                 while ($dataParsed = $longPollData->fetchAssoc()) {
 
                     if ((int)$dataParsed['isChecked'] === 0) {
-                        $dataCollected[] = unserialize($dataParsed['dataSerialized']);
+
+                        if (isset($_GET['flags'])) {
+
+                            $tempData = unserialize($dataParsed['dataSerialized']);
+                            $dataToAdd = [];
+                            $explodedFlags = explode(",", $_GET['flags']);
+
+                            for ($numberExplode = 0; $numberExplode < count($explodedFlags); $numberExplode++) {
+
+                                switch ($explodedFlags[$numberExplode]) {
+
+                                    case "info_peerId":
+                                        $dataToAdd[] = json_decode(Users::get($_GET['token'], "".$tempData['objects']['peer_id']), true)['response'];
+                                        break;
+
+                                }
+
+                            }
+
+                            $tempData['objects']['message'] = Other::decryptMessage($tempData['objects']['message']);
+                            $tempData['objects']["flagsData"] = $dataToAdd;
+                            $dataCollected[] = $tempData;
+
+                        } else {
+
+                            $dataCollected[] = unserialize($dataParsed['dataSerialized']);
+
+                        }
                         Database::getInstance()->query("UPDATE eviger.eviger_longpoll_data SET isChecked = 1 WHERE id = ?i", $dataParsed['id']);
+
                     }
 
                 }
@@ -49,7 +78,7 @@ try {
 
             }
 
-            (new Response())->setStatus("ok")->setResponse(["objects" => $dataCollected])->send();
+            (new Response())->setStatus("ok")->setResponse($dataCollected)->send();
             break;
 
         default:
