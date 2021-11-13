@@ -56,7 +56,7 @@ class Messages
 
             $personalIdLongPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE eid = ?i", $myId)->getNumRows();
 
-            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, "eventType" => 1, "objects" => ["id" => (int)$local_id_message, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
+            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => (int)($personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1), "eventType" => "newMessage", "objects" => ["id" => (int)$local_id_message, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
 
             return (new Response)
                 ->setStatus("ok")
@@ -71,7 +71,7 @@ class Messages
 
         $personalIdLongPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE eid = ?i", $myId)->getNumRows();
 
-        Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, "eventType" => 1, "objects" => ["id" => 1, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
+        Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, eid, type, dataSerialized) VALUES (?i, ?i, 1, '?s')", $personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1, $myId, serialize(["eventId" => (int)($personalIdLongPollData === 0 ? 1 : $personalIdLongPollData + 1), "eventType" => "newMessage", "objects" => ["id" => 1, "out_id" => (int)$myId, "peer_id" => (int)$idParsed, "message" => Other::encryptMessage($text), "date" => $time]]));
 
         return (new Response)
             ->setStatus("ok")
