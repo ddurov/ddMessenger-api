@@ -2,8 +2,8 @@ RewriteEngine On
 RewriteRule .* index.php [L]
 
 SetEnv DATABASE_SERVER localhost
-SetEnv DATABASE_LOGIN user
+SetEnv DATABASE_LOGIN login
 SetEnv DATABASE_PASSWORD password
-SetEnv DATABASE_NAME name
+SetEnv DATABASE_NAME eviger
 
-SetEnv HASH_KEY key
+SetEnv HASH_KEY hash

@@ -32,7 +32,8 @@ try {
 
             while ($nowSecond < $_GET['waitTime']) {
 
-                $longPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $_GET['token'])->fetchAssoc()['eid']);
+                $myId = Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $_GET['token'])->fetchAssoc()['eid'];
+                $longPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE toEid = ?i", $myId, $myId);
 
                 while ($dataParsed = $longPollData->fetchAssoc()) {
 
@@ -48,8 +49,8 @@ try {
 
                                 switch ($explodedFlags[$numberExplode]) {
 
-                                    case "info_peerId":
-                                        $dataToAdd[] = json_decode(Users::get($_GET['token'], "".$tempData['objects']['peer_id']), true)['response'];
+                                    case "peerIdInfo":
+                                        $dataToAdd[] = json_decode(Users::get($_GET['token'], $tempData['objects']['peer_id']), true)['response'];
                                         break;
 
                                 }

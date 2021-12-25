@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json; charset=utf-8');
 
 require_once "../vendor/autoload.php";
 
@@ -26,7 +25,7 @@ if (count($matches) === 0) {
 }
 
 $method = $matches[1];
-$mixedData = $_SERVER['REQUEST_METHOD'] == "GET" ? $_GET : json_decode(file_get_contents('php://input'), true);
+$mixedData = $_SERVER['REQUEST_METHOD'] === "GET" ? $_GET : json_decode(file_get_contents('php://input'), true);
 
 try {
 
@@ -53,9 +52,9 @@ try {
                 case "confirmCode":
                     Other::postUsageMethod();
                     if (!isset($mixedData['email']) || $mixedData['email'] === "") throw new selfThrows(["message" => "email parameter is missing or null"]);
-                    if (!isset($mixedData['code']) || $mixedData['code'] === "") throw new selfThrows(["message" => "code parameter is missing or null"]);
-                    if (!isset($mixedData['hash']) || $mixedData['hash'] === "") throw new selfThrows(["message" => "hash parameter is missing or null"]);
-                    die(Email::confirmCode($mixedData['email'], $mixedData['code'], $mixedData['hash']));
+                    if (!isset($mixedData['emailCode']) || $mixedData['emailCode'] === "") throw new selfThrows(["message" => "emailCode parameter is missing or null"]);
+                    if (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "") throw new selfThrows(["message" => "hashCode parameter is missing or null"]);
+                    die(Email::confirmCode($mixedData['email'], $mixedData['emailCode'], $mixedData['hashCode']));
 
                 default:
                     throw new selfThrows(["message" => "unknown sub-method", "parameters" => $mixedData]);
@@ -105,9 +104,9 @@ try {
 
                     if (!isset($mixedData['login']) || $mixedData['login'] === "") throw new selfThrows(["message" => "login parameter is missing or null"]);
 
-                    if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) throw new selfThrows(["message" => "the login is too big or too small"]);
+                    if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) throw new selfThrows(["message" => "login is too big or too small"]);
 
-                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['login'])) throw new selfThrows(["message" => "the login must contain a-z, A-Z, 0-9 and _"]);
+                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['login'])) throw new selfThrows(["message" => "login must contain a-z, A-Z, 0-9 and _"]);
 
                     if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s'", $mixedData['login'])->getNumRows()) throw new selfThrows(["message" => "user not found"]);
 
@@ -115,9 +114,9 @@ try {
 
                     if (!isset($mixedData['password']) || $mixedData['password'] === "") throw new selfThrows(["message" => "password parameter is missing or null"]);
 
-                    if ((mb_strlen($mixedData['password']) <= 8 || $mixedData['password'] >= 64)) throw new selfThrows(["message" => "the password is too big or too small"]);
+                    if (mb_strlen($mixedData['password']) <= 8) throw new selfThrows(["message" => "password is too small"]);
 
-                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['password'])) throw new selfThrows(["message" => "the password must contain a-z, A-Z, 0-9 and _"]);
+                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['password'])) throw new selfThrows(["message" => "password must contain a-z, A-Z, 0-9 and _"]);
 
                     // processing authentication
 
@@ -130,17 +129,19 @@ try {
 
                     if (!isset($mixedData['login']) || $mixedData['login'] === "") throw new selfThrows(["message" => "login parameter is missing"]);
 
-                    if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) throw new selfThrows(["message" => "the login is too big or too small"]);
+                    if (mb_strlen($mixedData['login']) <= 6 || mb_strlen($mixedData['login']) >= 20) throw new selfThrows(["message" => "login is too big or too small"]);
 
-                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['login'])) throw new selfThrows(["message" => "the login must contain a-z, A-Z, 0-9 and _"]);
+                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['login'])) throw new selfThrows(["message" => "login must contain a-z, A-Z, 0-9 and _"]);
+
+                    if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s'", $mixedData['login'])->getNumRows()) throw new selfThrows(["message" => "user with provided login already registered"]);
 
                     // password checks
 
                     if (!isset($mixedData['password']) || $mixedData['password'] === "") throw new selfThrows(["message" => "password parameter is missing or null"]);
 
-                    if ((mb_strlen($mixedData['password']) <= 8 || $mixedData['password'] >= 64)) throw new selfThrows(["message" => "the password is too big or too small"]);
+                    if (mb_strlen($mixedData['password']) <= 8) throw new selfThrows(["message" => "password is too small"]);
 
-                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['password'])) throw new selfThrows(["message" => "the password must contain a-z, A-Z, 0-9 and _"]);
+                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['password'])) throw new selfThrows(["message" => "password must contain a-z, A-Z, 0-9 and _"]);
 
                     // email checks
 
@@ -148,38 +149,21 @@ try {
 
                     if (!preg_match("/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/", $mixedData['email'])) throw new selfThrows(["message" => "email invalid"]);
 
-                    if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE email = '?s'", $mixedData['email'])->getNumRows()) throw new selfThrows(["message" => "email is busy"]);
+                    if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE email = '?s'", $mixedData['email'])->getNumRows()) throw new selfThrows(["message" => "user with provided email already registered"]);
 
                     // username checks
 
-                    if ($mixedData['userName'] !== null && isset($mixedData['userName'])) {
+                    if (isset($mixedData['userName']) && $mixedData['userName'] !== "") {
 
                         if (mb_strlen($mixedData['userName']) < 6 || mb_strlen($mixedData['userName']) > 128) throw new selfThrows(["message" => "username must be more than 6 or less than 128 characters"]);
 
-                        if (preg_match("/^e?id+[\d]+/u", $mixedData['userName'])) throw new selfThrows(["message" => "username cannot contain the prefix eid or id"]);
+                        if (preg_match("/^e?id+[\d]+/", $mixedData['userName'])) throw new selfThrows(["message" => "username cannot contain the prefix eid or id"]);
 
-                        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $mixedData['userName'])->getNumRows()) throw new selfThrows(["message" => "username is busy"]);
+                        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $mixedData['userName'])->getNumRows()) throw new selfThrows(["message" => "user with provided username already registered"]);
 
                     }
 
-                    // processing registering account
-
-                    if (!isset($mixedData['registrationEmailCode']) || $mixedData['registrationEmailCode'] === "") throw new selfThrows(["message" => "registrationEmailCode parameter is missing or null"]);
-
-                    if (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "") throw new selfThrows(["message" => "hashCode parameter is missing or null"]);
-
-                    die(User::registerAccount($mixedData['login'], $mixedData['password'], $mixedData['email'], ($mixedData['userName'] === null) ? null : $mixedData['userName'], $mixedData['registrationEmailCode'], $mixedData['hashCode']));
-
-                case 'restorePassword':
-                    Other::postUsageMethod();
-
-                    if (!isset($mixedData['login']) || $mixedData['login'] === "") throw new selfThrows(["message" => "login parameter is missing or null"]);
-
-                    if (!isset($mixedData['email']) || $mixedData['email'] === "") throw new selfThrows(["message" => "email parameter is missing or null"]);
-
-                    if (!isset($mixedData['emailCode']) && !isset($mixedData['hashCode'])) {
-
-                        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s' AND email = '?s'", $mixedData['login'], $mixedData['email'])->getNumRows()) throw new selfThrows(["message" => "login/email pair is not correct"]);
+                    if ((!isset($mixedData['emailCode']) || $mixedData['emailCode'] === "") && (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "")) {
 
                         (new Response)->setStatus("ok")->setResponse(["message" => "confirm email"])->send();
 
@@ -189,7 +173,36 @@ try {
 
                     if ($confirmCode['response'] !== true) throw new selfThrows(["message" => $confirmCode['response']['message']]);
 
-                    die(User::restorePassword($mixedData['email'], $mixedData['newPassword']));
+                    // processing registering account
+
+                    die(User::registerAccount($mixedData['login'], $mixedData['password'], $mixedData['email'], $mixedData['userName'], $mixedData['emailCode'], $mixedData['hashCode']));
+
+                case 'resetPassword':
+                    Other::postUsageMethod();
+
+                    if (!isset($mixedData['login']) || $mixedData['login'] === "") throw new selfThrows(["message" => "login parameter is missing or null"]);
+
+                    if (!isset($mixedData['email']) || $mixedData['email'] === "") throw new selfThrows(["message" => "email parameter is missing or null"]);
+
+                    if (!isset($mixedData['newPassword']) || $mixedData['newPassword'] === "") throw new selfThrows(["message" => "newPassword parameter is missing or null"]);
+
+                    if (mb_strlen($mixedData['newPassword']) <= 8) throw new selfThrows(["message" => "newPassword is too small"]);
+
+                    if (!preg_match("/[a-zA-Z0-9_]/ui", $mixedData['newPassword'])) throw new selfThrows(["message" => "newPassword must contain a-z, A-Z, 0-9 and _"]);
+
+                    if ((!isset($mixedData['emailCode']) || $mixedData['emailCode'] === "") && (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "")) {
+
+                        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE login = '?s' AND email = '?s'", $mixedData['login'], $mixedData['email'])->getNumRows()) throw new selfThrows(["message" => "login/email pair is not correct"]);
+
+                        (new Response)->setStatus("ok")->setResponse(["message" => "confirm email"])->send();
+
+                    }
+
+                    $confirmCode = json_decode(Email::confirmCode($mixedData['email'], $mixedData['emailCode'], $mixedData['hashCode']), true);
+
+                    if ($confirmCode['response'] !== true) throw new selfThrows(["message" => $confirmCode['response']['message']]);
+
+                    die(User::resetPassword($mixedData['email'], $mixedData['newPassword']));
 
                 case 'setOnline':
                     Other::postUsageMethod();
@@ -205,11 +218,11 @@ try {
 
                     if (!isset($mixedData['newName']) || $mixedData['newName'] === "") throw new selfThrows(["message" => "newName parameter is missing or null"]);
 
-                    if (mb_strlen($mixedData['newName']) < 6 || mb_strlen($mixedData['newName']) > 128) throw new selfThrows(["message" => "newName must be more than 6 or less than 128 characters"]);
+                    if (mb_strlen($mixedData['newName']) <= 6 || mb_strlen($mixedData['newName']) >= 128) throw new selfThrows(["message" => "newName must be more than 6 or less than 128 characters"]);
 
-                    if (preg_match("/^(e)?id.*/gu", $mixedData['newName'])) throw new selfThrows(["message" => "newName cannot contain the prefix eid or id"]);
+                    if (preg_match("/^e?id+[\d]+/", $mixedData['newName'])) throw new selfThrows(["message" => "newName cannot contain the prefix eid or id"]);
 
-                    if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $mixedData['userName'])->getNumRows()) throw new selfThrows(["message" => "newName is busy"]);
+                    if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $mixedData['newName'])->getNumRows()) throw new selfThrows(["message" => "user with provided newName already registered"]);
 
                     // email checks
 
@@ -219,13 +232,15 @@ try {
 
                     // code and hashCode checks
 
-                    if (!isset($mixedData['emailCode']) || $mixedData['emailCode'] === "") throw new selfThrows(["message" => "emailCode parameter is missing or null"]);
+                    if ((!isset($mixedData['emailCode']) || $mixedData['emailCode'] === "") && (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "")) {
 
-                    if (!isset($mixedData['hashCode']) || $mixedData['hashCode'] === "") throw new selfThrows(["message" => "hashCode parameter is missing or null"]);
+                        (new Response)->setStatus("ok")->setResponse(["message" => "confirm email"])->send();
+
+                    }
 
                     if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE code = '?s' AND hash = '?s'", $mixedData['emailCode'], $mixedData['hashCode'])->getNumRows()) throw new selfThrows(["message" => "emailCode or hashCode invalid"]);
 
-                    die(User::changeName($mixedData['name'], $mixedData['email'], $mixedData['code'], $mixedData['hashCode']));
+                    die(User::changeName($mixedData['name'], $mixedData['email'], $mixedData['emailCode'], $mixedData['hashCode']));
 
                 default:
                     throw new selfThrows(["message" => "unknown sub-method", "parameters" => $mixedData]);
@@ -242,7 +257,7 @@ try {
                     die(Users::get($mixedData['token'], $mixedData['id']));
 
                 case 'search':
-                    if (isset($mixedData['query']) && $mixedData['query'] !== "") die(Users::search($mixedData['query']));
+                    if (isset($mixedData['query']) && $mixedData['query'] !== "") die(Users::search($mixedData['query'], $mixedData['token']));
 
                     (new Response)
                         ->setStatus("ok")

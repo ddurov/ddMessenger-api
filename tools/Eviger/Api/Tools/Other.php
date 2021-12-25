@@ -101,9 +101,8 @@ class Other
     /**
      * @throws selfThrows
      */
-    public static function postUsageMethod(): bool
+    public static function postUsageMethod(): void
     {
         if ($_SERVER["REQUEST_METHOD"] !== "POST") throw new selfThrows(["message" => "this method usage only POST requests"]);
-        return true;
     }
 }

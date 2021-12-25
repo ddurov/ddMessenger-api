@@ -28,14 +28,14 @@ class Email
         $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
         $hash = md5($code . "|" . bin2hex(random_bytes(8)));
 
-        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE ip_request = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "cooldown"]);
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "code has already been requested", "hash" => Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->fetchAssoc()["hash"]]);
 
         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
-            if (time() - Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['date_request'] > 300) throw new selfThrows(["message" => "cooldown"]);
+            if (time() - Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['requestTime'] > 300) throw new selfThrows(["message" => "code has already been requested", "hash" => Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->fetchAssoc()["hash"]]);
 
-            Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', date_request = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
+            Database::getInstance()->query("UPDATE eviger.eviger_codes_email SET code = '?s', requestTime = ?i, hash = '?s' WHERE email = '?s'", $code, time(), $hash, $email);
         } else {
-            Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, date_request, ip_request, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
+            Database::getInstance()->query("INSERT INTO eviger.eviger_codes_email (code, email, requestTime, requestIp, hash) VALUES ('?s', '?s', ?i, '?s', '?s')", $code, $email, time(), $_SERVER['REMOTE_ADDR'], $hash);
         }
 
         mail($email, "Подтверждение почты", "Ваш код подтверждения: <b>$code</b><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немедленно смените пароль</b>", ["From" => getenv("USER_MAIL_DOMAIN"), "MIME-Version" => 1.0, "Content-type" => "text/html; charset=utf-8"]);

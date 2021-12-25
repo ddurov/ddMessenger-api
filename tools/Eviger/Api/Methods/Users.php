@@ -14,11 +14,11 @@ class Users
 
     /**
      * @param string $token
-     * @param string|null $id
+     * @param $id
      * @return string
      * @throws selfThrows|MySqlException
      */
-    public static function get(string $token, ?string $id = NULL): string
+    public static function get(string $token, $id = NULL): string
     {
         if ($id === NULL) {
 
@@ -54,15 +54,19 @@ class Users
 
     /**
      * @param string $query
+     * @param string $token
      * @return string
      * @throws MySqlException
      */
-    public static function search(string $query): string
+    public static function search(string $query, string $token): string
     {
         $dataFromDatabase = [];
         $dataNotParsed = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username LIKE \"%?S%\"", $query);
+        $myId = (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
 
         while ($dataParsed = $dataNotParsed->fetchAssoc()) {
+
+            if ($dataParsed['id'] === $myId) continue;
 
             $dataFromDatabase[] = [
                 "eid" => (int)$dataParsed['id'],
