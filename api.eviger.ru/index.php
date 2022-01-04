@@ -240,7 +240,7 @@ try {
 
                     if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE code = '?s' AND hash = '?s'", $mixedData['emailCode'], $mixedData['hashCode'])->getNumRows()) throw new selfThrows(["message" => "emailCode or hashCode invalid"]);
 
-                    die(User::changeName($mixedData['name'], $mixedData['email'], $mixedData['emailCode'], $mixedData['hashCode']));
+                    die(User::changeName($mixedData['newName'], $mixedData['email'], $mixedData['emailCode'], $mixedData['hashCode']));
 
                 default:
                     throw new selfThrows(["message" => "unknown sub-method", "parameters" => $mixedData]);
@@ -257,19 +257,14 @@ try {
                     die(Users::get($mixedData['token'], $mixedData['id']));
 
                 case 'search':
-                    if (isset($mixedData['query']) && $mixedData['query'] !== "") die(Users::search($mixedData['query'], $mixedData['token']));
+                    if (!isset($mixedData['query']) || $mixedData['query'] === "") throw new selfThrows(["message" => "query parameter is missing or null"]);
 
-                    (new Response)
-                        ->setStatus("ok")
-                        ->setResponse([])
-                        ->send();
-                    break;
+                    die(Users::search($mixedData['query'], $mixedData['token']));
 
                 default:
                     throw new selfThrows(["message" => "unknown sub-method", "parameters" => $mixedData]);
 
             }
-            break;
 
         default:
             throw new selfThrows(["message" => "unknown method", "parameters" => $mixedData]);

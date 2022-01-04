@@ -32,41 +32,44 @@ try {
 
             while ($nowSecond < $_GET['waitTime']) {
 
-                $myId = Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $_GET['token'])->fetchAssoc()['eid'];
-                $longPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE toEid = ?i", $myId, $myId);
+                $myId = (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $_GET['token'])->fetchAssoc()['eid'];
+                $longPollData = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE instr(eviger.eviger_longpoll_data.peers, '?i') > 0", $myId);
 
                 while ($dataParsed = $longPollData->fetchAssoc()) {
 
-                    if ((int)$dataParsed['isChecked'] === 0) {
+                    $whoCheckedEvent = unserialize($dataParsed['whoChecked']);
+
+                    if (!in_array($myId, $whoCheckedEvent)) {
+
+                        $data = unserialize($dataParsed['dataSerialized']);
 
                         if (isset($_GET['flags'])) {
 
-                            $tempData = unserialize($dataParsed['dataSerialized']);
-                            $dataToAdd = [];
+                            $flagsData = [];
                             $explodedFlags = explode(",", $_GET['flags']);
+                            $explodedPeers = explode(",", $dataParsed['peers']);
+
+                            $data['objects']['peerId'] = (int) $explodedPeers[0] === $myId ? (int) $explodedPeers[1] : (int) $explodedPeers[0];
 
                             for ($numberExplode = 0; $numberExplode < count($explodedFlags); $numberExplode++) {
 
                                 switch ($explodedFlags[$numberExplode]) {
 
                                     case "peerIdInfo":
-                                        $dataToAdd[] = json_decode(Users::get($_GET['token'], $tempData['objects']['peer_id']), true)['response'];
+                                        $flagsData[] = json_decode(Users::get($_GET['token'], $data['objects']['peerId']), true)['response'];
                                         break;
 
                                 }
 
                             }
 
-                            $tempData['objects']['message'] = Other::decryptMessage($tempData['objects']['message']);
-                            $tempData['objects']["flagsData"] = $dataToAdd;
-                            $dataCollected[] = $tempData;
-
-                        } else {
-
-                            $dataCollected[] = unserialize($dataParsed['dataSerialized']);
+                            $data['objects']['message'] = Other::decryptMessage($data['objects']['message']);
+                            $data['objects']['flagsData'] = $flagsData;
 
                         }
-                        Database::getInstance()->query("UPDATE eviger.eviger_longpoll_data SET isChecked = 1 WHERE id = ?i", $dataParsed['id']);
+                        $dataCollected[] = $data;
+                        $whoCheckedEvent[] = $myId;
+                        Database::getInstance()->query("UPDATE eviger.eviger_longpoll_data SET whoChecked = '?s' WHERE id = ?i", serialize($whoCheckedEvent), $dataParsed['id']);
 
                     }
 

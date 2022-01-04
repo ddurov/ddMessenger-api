@@ -87,9 +87,9 @@ class Other
     }
 
     /**
-     * @param string $message
+     * @param mixed $message
      */
-    public static function log(string $message): void
+    public static function log($message): void
     {
         if (!file_exists('/var/log/API/') && !mkdir('/var/log/API/', 0777, true) && !is_dir('/var/log/API/')) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', '/var/log/API/'));
