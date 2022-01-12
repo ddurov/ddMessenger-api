@@ -41,10 +41,10 @@ class Other
 
     /**
      * @param string $token
-     * @return bool
+     * @return void
      * @throws selfThrows|MySqlException
      */
-    public static function checkToken(string $token): bool
+    public static function checkToken(string $token): void
     {
 
         if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) throw new selfThrows(["message" => "token not found"]);
@@ -65,8 +65,6 @@ class Other
             }
 
         }
-
-        return true;
 
     }
 
