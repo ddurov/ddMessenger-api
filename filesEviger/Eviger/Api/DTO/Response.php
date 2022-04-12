@@ -5,6 +5,7 @@ namespace Eviger\Api\DTO;
 
 class Response
 {
+    private int $code = 200;
     private string $status;
     private $response;
 
@@ -13,7 +14,9 @@ class Response
      */
     public function toJson(): string
     {
-        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
+        http_response_code($this->code);
+        unset($this->code);
+        return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
     /**
@@ -36,17 +39,9 @@ class Response
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return get_object_vars($this);
-    }
-
-    public function send(): void
-    {
-        die(self::toJson());
+    public function setCode(int $code): Response {
+        $this->code = $code;
+        return $this;
     }
 
     /**
@@ -63,5 +58,26 @@ class Response
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
+
+    public function send(): void
+    {
+        die(self::toJson());
     }
 }

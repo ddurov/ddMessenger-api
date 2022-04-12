@@ -26,10 +26,10 @@ class User
     public static function registerAccount(string $login, string $password, string $email, ?string $username, string $emailCode, string $hashCode): string
     {
 
-        $salt = bin2hex(random_bytes(8));
+        $salt = bin2hex(random_bytes(16));
         $getCodeEmailStatus = json_decode(Email::confirmCode($email, $emailCode, $hashCode), true);
 
-        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']]);
+        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']], http_response_code());
 
         $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
 
@@ -69,7 +69,7 @@ class User
 
         $salt = Database::getInstance()->query("SELECT passwordSalt FROM eviger.eviger_users WHERE login = '?s'", $login)->fetchAssoc()['passwordSalt'];
 
-        if (md5($password . $salt) !== Database::getInstance()->query("SELECT passwordHash FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['passwordHash']) throw new selfThrows(["message" => "invalid login or password"]);
+        if (md5($password . $salt) !== Database::getInstance()->query("SELECT passwordHash FROM eviger_users WHERE login = '?s'", $login)->fetchAssoc()['passwordHash']) throw new selfThrows(["message" => "invalid login or password"], 400);
 
         if (Database::getInstance()->query("SELECT * FROM eviger_attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 
@@ -106,7 +106,7 @@ class User
     public static function resetPassword(string $email, string $newPassword): string
     {
 
-        $salt = bin2hex(random_bytes(8));
+        $salt = bin2hex(random_bytes(16));
         $token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyz"), 0, 77);
         $idAccount = Database::getInstance()->query("SELECT id FROM eviger_users WHERE email = '?s'", $email)->fetchAssoc()['id'];
 
@@ -171,11 +171,9 @@ class User
 
         $getCodeEmailStatus = json_decode(Email::confirmCode($email, $codeEmail, $hashCode), true);
 
-        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']]);
+        if ($getCodeEmailStatus['response'] !== true) throw new selfThrows(["message" => $getCodeEmailStatus['response']['error']], http_response_code());
 
-        if (preg_match("/^e?id+[\d]+/u", $newName)) throw new selfThrows(["message" => "newName cannot contain the prefix eid or id"]);
-
-        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE username = '?s'", $newName)->getNumRows()) throw new selfThrows(["message" => "newName is busy"]);
+        if (preg_match("/^e?id+[\d]+/u", $newName)) throw new selfThrows(["message" => "newName cannot contain the prefix eid or id"], 400);
 
         Database::getInstance()->query("DELETE FROM eviger_codes_email WHERE email = '?s'", $email);
         Database::getInstance()->query("UPDATE eviger.eviger_users SET username = '?s' WHERE email = '?s'", $newName, $email);

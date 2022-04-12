@@ -38,7 +38,7 @@ class Users
 
         $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id invalid"]);
+        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id not found"], 404);
 
         $idParsed = (int)$selectAllOfUserObject->fetchAssoc()['id'];
 

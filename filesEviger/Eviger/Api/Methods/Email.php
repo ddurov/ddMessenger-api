@@ -26,9 +26,13 @@ class Email
         if (preg_match("/(.*)?eviger\.ru/isu", $email)) throw new selfThrows(["message" => "email must not contain domains of any level eviger.ru"]);
 
         $code = mb_substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 16);
-        $hash = md5($code . "|" . bin2hex(random_bytes(8)));
+        $hash = md5($code . "|" . bin2hex(random_bytes(16)));
 
-        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) throw new selfThrows(["message" => "code has already been requested", "hash" => Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->fetchAssoc()["hash"]]);
+        if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->getNumRows()) return (new Response)
+            ->setCode(100)
+            ->setStatus("ok")
+            ->setResponse(["message" => "code has already been requested", "hash" => Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->fetchAssoc()["hash"]])
+            ->toJson();
 
         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->getNumRows()) {
             if (time() - Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['requestTime'] > 300) throw new selfThrows(["message" => "code has already been requested", "hash" => Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE requestIp = '?s'", $_SERVER['REMOTE_ADDR'])->fetchAssoc()["hash"]]);
@@ -41,6 +45,7 @@ class Email
         mail($email, "Подтверждение почты", "Ваш код подтверждения: <b>$code</b><br>Данный код будет активен в течении часа с момента получения письма<br>Если вы не запрашивали данное письмо <b>немедленно смените пароль</b>", ["From" => getenv("USER_MAIL_DOMAIN"), "MIME-Version" => 1.0, "Content-type" => "text/html; charset=utf-8"]);
 
         return (new Response)
+            ->setCode(201)
             ->setStatus("ok")
             ->setResponse(["hash" => $hash])
             ->toJson();
@@ -57,9 +62,9 @@ class Email
     public static function confirmCode(string $email, string $code, string $hash): string
     {
 
-        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s' AND code = '?s'", $email, $code)->getNumRows()) throw new selfThrows(["message" => "invalid code"]);
+        if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_codes_email WHERE email = '?s' AND code = '?s'", $email, $code)->getNumRows()) throw new selfThrows(["message" => "invalid code"], 400);
 
-        if ($hash !== Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) throw new selfThrows(["message" => "invalid hash"]);
+        if ($hash !== Database::getInstance()->query("SELECT hash FROM eviger.eviger_codes_email WHERE email = '?s'", $email)->fetchAssoc()['hash']) throw new selfThrows(["message" => "invalid hash"], 400);
 
         return (new Response)
             ->setStatus("ok")

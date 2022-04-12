@@ -30,17 +30,17 @@ class Messages
 
         $idParsed = (int)$selectAllOfUserObject->fetchAssoc()['id'];
 
-        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "to_id invalid"]);
+        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "to_id not found"], 404);
 
         $dialog = Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs WHERE (firstId = ?i AND secondId = ?i) OR (secondId = ?i AND firstId = ?i)", $myId, $idParsed, $myId, $idParsed);
 
         $fetchedDialog = $dialog->fetchAssoc();
 
+        $messageId = isset($fetchedDialog['lastMessageId']) ? $fetchedDialog['lastMessageId'] + 1 : 1;
+
         $time = time();
 
         if ($dialog->getNumRows()) {
-
-            $messageId = $fetchedDialog['lastMessageId'] + 1;
 
             Database::getInstance()->query("INSERT INTO eviger.eviger_messages (dialogId, senderId, messageId, message, messageDate) VALUES (?i, ?i, ?i, '?s', ?i)",
                 $fetchedDialog['id'],
@@ -55,65 +55,45 @@ class Messages
                 $time,
                 $fetchedDialog['id']);
 
-            $personalId = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE peers LIKE '%?i%' AND peers LIKE '%?i%'", $myId, $idParsed)->getNumRows();
-
-            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, type, peers, dataSerialized, whoChecked) VALUES (?i, 1, '?s', '?s', '?s')",
-                $personalId === 0 ? 1 : $personalId + 1,
-                "$myId,$idParsed",
-                serialize(["eventId" => (int)((int)$personalId === 0 ? 1 : $personalId + 1),
-                    "eventType" => "newMessage",
-                    "objects" => ["id" => $messageId,
-                        "peerId" => -1, // don't remove
-                        "senderId" => $myId,
-                        "message" => Other::encryptMessage($text),
-                        "date" => $time
-                    ]
-                ]),
-                serialize([]));
-
-            return (new Response)
-                ->setStatus("ok")
-                ->setResponse(["id" => (int)$messageId])
-                ->toJson();
-
         } else {
 
             Database::getInstance()->query("INSERT INTO eviger.eviger_messages (dialogId, senderId, messageId, message, messageDate) VALUES (?i, ?i, ?i, '?s', ?i)",
-                Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs")->getNumRows()+1,
+                Database::getInstance()->query("SELECT * FROM eviger.eviger_dialogs")->getNumRows() + 1,
                 $myId,
-                1,
+                $messageId,
                 Other::encryptMessage($text),
                 $time);
 
             Database::getInstance()->query("INSERT INTO eviger.eviger_dialogs (firstId, secondId, lastMessageId, lastMessage, lastMessageDate) VALUES (?i, ?i, ?i, '?s', ?i)",
                 $myId,
                 $idParsed,
-                1,
+                $messageId,
                 Other::encryptMessage($text),
                 $time);
 
-            $personalId = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE peers LIKE '%?i%' AND peers LIKE '%?i%'", $myId, $idParsed)->getNumRows();
-
-            Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, type, peers, dataSerialized, whoChecked) VALUES (?i, 1, '?s', '?s', '?s')",
-                $personalId === 0 ? 1 : $personalId + 1,
-                "$myId,$idParsed",
-                serialize(["eventId" => (int)((int)$personalId === 0 ? 1 : $personalId + 1),
-                    "eventType" => "newMessage",
-                    "objects" => ["id" => 1,
-                        "peerId" => -1, // don't remove
-                        "senderId" => $myId,
-                        "message" => Other::encryptMessage($text),
-                        "date" => $time
-                    ]
-                ]),
-                serialize([]));
-
-            return (new Response)
-                ->setStatus("ok")
-                ->setResponse(["id" => 1])
-                ->toJson();
-
         }
+
+        $personalId = Database::getInstance()->query("SELECT * FROM eviger.eviger_longpoll_data WHERE peers LIKE '%?i%' AND peers LIKE '%?i%'", $myId, $idParsed)->getNumRows();
+
+        Database::getInstance()->query("INSERT INTO eviger.eviger_longpoll_data (personalIdEvent, type, peers, dataSerialized, whoChecked) VALUES (?i, 1, '?s', '?s', '?s')",
+            $personalId ? 1 : $personalId + 1,
+            "$myId,$idParsed",
+            serialize(["eventId" => $personalId ? 1 : $personalId + 1,
+                "eventType" => "newMessage",
+                "objects" => ["id" => $messageId,
+                    "peerId" => -1, // don't remove
+                    "senderId" => $myId,
+                    "message" => Other::encryptMessage($text),
+                    "date" => $time
+                ]
+            ]),
+            serialize([]));
+
+        return (new Response)
+            ->setCode(201)
+            ->setStatus("ok")
+            ->setResponse(["id" => (int)$messageId])
+            ->toJson();
 
     }
 
@@ -129,7 +109,7 @@ class Messages
 
         $selectAllOfUserObject = Database::getInstance()->query("SELECT * FROM eviger.eviger_users WHERE eviger_users.id = ?i OR eviger_users.username = '?s'", (!is_numeric($id)) ? 0 : $id, $id);
 
-        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id invalid"]);
+        if (!$selectAllOfUserObject->getNumRows()) throw new selfThrows(["message" => "id not found"], 404);
 
         $idParsed = (int)$selectAllOfUserObject->fetchAssoc()['id'];
 

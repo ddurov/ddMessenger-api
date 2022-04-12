@@ -6,9 +6,9 @@ use Exception;
 
 class selfThrows extends Exception
 {
-    public function __construct($message, $code = 0)
+    public function __construct($message, $code = 500)
     {
-        parent::__construct(json_encode(["status" => "error", "response" => $message], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), $code);
+        parent::__construct((new Response)->setCode($code)->setStatus("error")->setResponse($message)->toJson(), $code);
     }
 
 }
