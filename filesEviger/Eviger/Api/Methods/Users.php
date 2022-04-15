@@ -18,9 +18,9 @@ class Users
      * @return string
      * @throws selfThrows|MySqlException
      */
-    public static function get(string $token, $id = NULL): string
+    public static function get($id, string $token): string
     {
-        if ($id === NULL) {
+        if ($id === 0) {
 
             $idByToken = (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
 
@@ -65,8 +65,6 @@ class Users
         $myId = (int)Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'];
 
         while ($dataParsed = $dataNotParsed->fetchAssoc()) {
-
-            if ($dataParsed['id'] === $myId) continue;
 
             $dataFromDatabase[] = [
                 "eid" => (int)$dataParsed['id'],

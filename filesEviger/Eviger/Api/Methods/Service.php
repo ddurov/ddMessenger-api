@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Eviger\Api\Methods;
 
 use Eviger\Api\DTO\Response;
+use Eviger\Api\DTO\selfThrows;
 use Eviger\Database;
 use Krugozor\Database\MySqlException;
 
@@ -27,5 +28,17 @@ class Service
             ])
             ->toJson();
 
+    }
+
+    public static function getPinningHashByDomain(string $domain): string
+    {
+        if (gethostbyname($domain) === $domain) throw new selfThrows(["message" => "domain parameter invalid or not created"], 400);
+
+        return (new Response)
+            ->setStatus("ok")
+            ->setResponse([
+                "key" => shell_exec("sh ../filesEviger/Eviger/Api/Tools/getKeyPinning.sh " . $domain)
+            ])
+            ->toJson();
     }
 }

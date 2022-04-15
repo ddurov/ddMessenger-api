@@ -47,6 +47,8 @@ class Other
     public static function checkToken(string $token): void
     {
 
+        if ($token === null || $token === "") throw new selfThrows(["message" => "token parameter is missing or null"]);
+
         if (!Database::getInstance()->query("SELECT * FROM eviger.eviger_tokens WHERE token = '?s'", $token)->getNumRows()) throw new selfThrows(["message" => "token not found"]);
 
         if (Database::getInstance()->query("SELECT * FROM eviger.eviger_deactivated_accounts WHERE eid = ?i", Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid'])->getNumRows()) throw new selfThrows(["message" => "account deactivated", "canRestoreNow" => true]);

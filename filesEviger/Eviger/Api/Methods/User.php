@@ -132,26 +132,10 @@ class User
     public static function setOnline(string $token): string
     {
 
-        Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1, lastSendedOnline = ?i WHERE id = ?i",
+        Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1, lastSentOnline = ?i WHERE id = ?i",
             time(),
             Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
 
-        return (new Response)
-            ->setStatus("ok")
-            ->toJson();
-
-    }
-
-    /**
-     * @param string $token
-     * @return string
-     * @throws MySqlException
-     */
-    public static function setOffline(string $token): string
-    {
-
-        Database::getInstance()->query("UPDATE eviger.eviger_users SET lastSeen = 1 WHERE id = ?i",
-            Database::getInstance()->query("SELECT eid FROM eviger.eviger_tokens WHERE token = '?s'", $token)->fetchAssoc()['eid']);
         return (new Response)
             ->setStatus("ok")
             ->toJson();
