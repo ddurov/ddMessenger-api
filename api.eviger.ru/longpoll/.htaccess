@@ -1,9 +1,0 @@
-RewriteEngine On
-RewriteRule .* index.php [L]
-
-SetEnv DATABASE_SERVER localhost
-SetEnv DATABASE_LOGIN login
-SetEnv DATABASE_PASSWORD password
-SetEnv DATABASE_NAME eviger
-
-SetEnv HASH_KEY hash

@@ -1,2 +1,4 @@
-/filesEviger/vendor/
-/.idea/
+vendor/
+.idea/
+composer.lock
+.env
