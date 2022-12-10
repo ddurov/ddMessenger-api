@@ -8,9 +8,9 @@ use Api\Singletones\Database;
 use Core\Controllers\Controller;
 use Core\DTO\Response;
 use Core\Exceptions\EntityNotFound;
+use Core\Exceptions\InvalidParameter;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
-use Rakit\Validation\Validator;
 
 class SessionController extends Controller
 {
@@ -32,15 +32,13 @@ class SessionController extends Controller
      * @return void
      * @throws EntityNotFound
      * @throws ORMException
+     * @throws InvalidParameter
      */
     public function create(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["headers"], [
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -55,15 +53,13 @@ class SessionController extends Controller
      * @return void
      * @throws EntityNotFound
      * @throws Exception
+     * @throws InvalidParameter
      */
     public function get(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["headers"], [
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -77,16 +73,14 @@ class SessionController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      */
     public function check(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["headers"], [
             "HTTP_TOKEN" => "required",
             "HTTP_SESSION_ID" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 

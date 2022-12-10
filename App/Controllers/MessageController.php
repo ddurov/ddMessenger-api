@@ -8,9 +8,9 @@ use Api\Singletones\Database;
 use Core\Controllers\Controller;
 use Core\DTO\Response;
 use Core\Exceptions\EntityNotFound;
+use Core\Exceptions\InvalidParameter;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
-use Rakit\Validation\Validator;
 
 class MessageController extends Controller
 {
@@ -31,18 +31,16 @@ class MessageController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      * @throws ORMException
      */
     public function send(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "aId" => "required|numeric",
             "text" => "required",
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -58,17 +56,15 @@ class MessageController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      * @throws ORMException
      */
     public function getHistory(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "aId" => "required|numeric",
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -84,15 +80,13 @@ class MessageController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      */
     public function getDialogs(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["headers"], [
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 

@@ -15,7 +15,6 @@ use Core\Exceptions\EntityNotFound;
 use Core\Exceptions\InvalidParameter;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
-use Rakit\Validation\Validator;
 
 class UserController extends Controller
 {
@@ -46,7 +45,7 @@ class UserController extends Controller
      */
     public function register(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"], [
+        parent::validateData(parent::$inputData["data"], [
             "login" => "required|between:6,20|regex:/\w+/",
             "password" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/",
             "username" => "required",
@@ -54,9 +53,6 @@ class UserController extends Controller
             "emailCode" => "required",
             "hash" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
             throw new InvalidParameter("username shouldn't contains (a)id prefix");
@@ -80,13 +76,10 @@ class UserController extends Controller
      */
     public function auth(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"], [
+        parent::validateData(parent::$inputData["data"], [
             "login" => "required|between:6,20|regex:/\w+/",
             "password" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         (new Response())->setResponse(["sessionId" => $this->userService->auth(
             parent::$inputData["data"]["login"],
@@ -102,15 +95,12 @@ class UserController extends Controller
      */
     public function resetPassword(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "newPassword" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/",
             "emailCode" => "required",
             "hash" => "required",
             "HTTP_SESSION_ID" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
@@ -129,13 +119,10 @@ class UserController extends Controller
      */
     public function changeName(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "newName" => "required",
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["newName"]))
             throw new InvalidParameter("newName shouldn't contains (a)id prefix");
@@ -150,16 +137,14 @@ class UserController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      */
     public function get(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "aId" => "required|numeric",
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -171,16 +156,14 @@ class UserController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
+     * @throws InvalidParameter
      */
     public function search(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"] + parent::$inputData["headers"], [
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
             "query" => "required",
             "HTTP_TOKEN" => "required"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 

@@ -31,17 +31,15 @@ class EmailController extends Controller
     /**
      * @return void
      * @throws InternalError
+     * @throws InvalidParameter
      * @throws ORMException
      * @throws \PHPMailer\PHPMailer\Exception
      */
     public function createCode(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"], [
+        parent::validateData(parent::$inputData["data"], [
             "email" => "required|email"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         (new Response())->setResponse(["hash" =>
             $this->emailService->createCode(parent::$inputData["data"]["email"])
@@ -55,14 +53,11 @@ class EmailController extends Controller
      */
     public function confirmCode(): void
     {
-        $validation = (new Validator())->validate(parent::$inputData["data"], [
+        parent::validateData(parent::$inputData["data"], [
             "code" => "required",
             "hash" => "required",
             "needRemove" => "required|numeric"
         ]);
-
-        if (isset($validation->errors->all()[0]))
-            (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
         (new Response())->setResponse(["valid" =>
             $this->emailService->confirmCode(
