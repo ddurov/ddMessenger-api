@@ -3,15 +3,14 @@
 require_once "../../vendor/autoload.php";
 
 use Core\DTO\Response;
+use Core\Exceptions\CoreExceptions;
 use Core\Tools\Other;
-use Core\Tools\selfThrows;
 
 header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json; charset=utf-8');
 
-try {
+/*try {
 
-    /*$method = $matches[1];
+    $method = $matches[1];
 
     if (!isset($method) || $method === "") throw new selfThrows(["message" => "method parameter is missing or null"]);
 
@@ -83,15 +82,15 @@ try {
         default:
             throw new selfThrows(["message" => "unknown method", "parameters" => $_GET]);
 
-    }*/
+    }
 
-} catch (selfThrows $e) {
+} catch (CoreExceptions $coreExceptions) {
 
-    die($e->getMessage());
+    (new Response())->setStatus("error")->setCode($coreExceptions->getCode())->setResponse(["message" => $coreExceptions->getMessage()])->send();
 
 } catch (Throwable $exceptions) {
 
     Other::log("Error: " . $exceptions->getMessage() . " on line: " . $exceptions->getLine() . " in: " . $exceptions->getFile());
-    (new Response)->setStatus("error")->setCode(500)->setResponse(["message" => "internal error, try later"])->send();
+    (new Response())->setStatus("error")->setCode(500)->setResponse(["message" => "internal error, try later"])->send();
 
-}
+}*/
