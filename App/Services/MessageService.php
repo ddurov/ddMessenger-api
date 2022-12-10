@@ -23,7 +23,7 @@ class MessageService
     }
 
     /**
-     * Возвращает айди нового сообщения
+     * Возвращает id нового сообщения
      * @param int $aId
      * @param string $text
      * @param string $token

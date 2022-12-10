@@ -26,7 +26,7 @@ class UserService
     }
 
     /**
-     * Регистрирует пользователя, возвращает айди + сессию
+     * Регистрирует пользователя, возвращает id + sessionId
      * @param string $login
      * @param string $password
      * @param string $username
@@ -83,12 +83,12 @@ class UserService
         $ban = Database::getInstance()->query("SELECT * FROM general.bans WHERE eid = ?i", $accountAsArray['id']);
         $banAsArray = $ban->fetchAssoc();
 
-        if ($ban->getNumRows()) throw new selfThrows(["message" => "account has been banned", "details" => ["reason" => $banAsArray["reason"], "canRestoreAccount" => (time() > $banAsArray['unbanTime'])]], 500);
+        if ($ban->getNumRows()) throw new selfThrows(["message" => "account has banned", "details" => ["reason" => $banAsArray["reason"], "canRestoreAccount" => (time() > $banAsArray['unbanTime'])]], 500);
 
         if (Database::getInstance()->query("SELECT * FROM general.attempts_auth WHERE login = '?s'", $login)->getNumRows() >= 5) {
 
             $banAsArray = Database::getInstance()->query("SELECT * FROM general.bans WHERE eid = ?i", $accountAsArray['id'])->fetchAssoc();
-            throw new selfThrows(["message" => "account has been banned", "details" => ["reason" => $banAsArray["reason"], "canRestoreAccount" => (time() > $banAsArray['unbanTime'])]], 500);
+            throw new selfThrows(["message" => "account has banned", "details" => ["reason" => $banAsArray["reason"], "canRestoreAccount" => (time() > $banAsArray['unbanTime'])]], 500);
 
         }
         */
@@ -180,7 +180,7 @@ class UserService
         /** @var UserModel[] $accounts */
         $accounts = $this->entityRepository->createQueryBuilder("u")
             ->where("u.username LIKE :search")
-            ->setParameter("search", "%{$query}%")
+            ->setParameter("search", "%$query%")
             ->getQuery()->getResult();
 
         if ($accounts === [])
