@@ -13,7 +13,6 @@ use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 
 class UserService
 {
@@ -35,7 +34,6 @@ class UserService
      * @return int
      * @throws EntityExists
      * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function register(string $login, string $password, string $username, string $email): int
     {
@@ -71,7 +69,6 @@ class UserService
      * @throws Exception
      * @throws InvalidParameter
      * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function auth(string $login, string $password): string
     {
@@ -111,8 +108,6 @@ class UserService
      * @param string $sessionId
      * @return bool
      * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws Exception
      */
     public function resetPassword(string $newPassword, string $sessionId): bool
     {
@@ -139,8 +134,6 @@ class UserService
      * @param string $token
      * @return bool
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      * @throws InvalidParameter
      */
     public function changeName(string $newName, string $token): bool
@@ -162,8 +155,6 @@ class UserService
      * @param string $token
      * @return array
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function get(?int $aId, string $token): array
     {

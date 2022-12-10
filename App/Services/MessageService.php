@@ -6,7 +6,6 @@ use Api\Models\DialogModel;
 use Api\Models\MessageModel;
 use Core\Exceptions\EntityNotFound;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
@@ -30,7 +29,6 @@ class MessageService
      * @param string $token
      * @return int
      * @throws EntityNotFound
-     * @throws Exception
      * @throws ORMException
      */
     public function send(int $aId, string $text, string $token): int
@@ -104,7 +102,6 @@ class MessageService
      * @param string $token
      * @return array
      * @throws EntityNotFound
-     * @throws Exception
      * @throws ORMException
      */
     public function getHistory(int $aId, ?int $offset, string $token): array
@@ -148,8 +145,6 @@ class MessageService
      * @param string $token
      * @return array
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function getDialogs(string $token): array
     {

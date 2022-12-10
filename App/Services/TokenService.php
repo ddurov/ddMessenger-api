@@ -5,11 +5,9 @@ namespace Api\Services;
 use Core\Exceptions\EntityNotFound;
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 
 class TokenService
 {
@@ -27,9 +25,7 @@ class TokenService
      * @param int $tokenType
      * @param string $sessionId
      * @return string
-     * @throws Exception
      * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function create(int $tokenType, string $sessionId): string
     {
@@ -51,8 +47,6 @@ class TokenService
      * @param int $tokenType
      * @param string $sessionId
      * @return string
-     * @throws Exception
-     * @throws ORMException
      */
     public function get(int $tokenType, string $sessionId): string
     {

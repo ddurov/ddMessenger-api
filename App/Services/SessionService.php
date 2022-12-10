@@ -76,7 +76,6 @@ class SessionService
      * @param string $token
      * @return string
      * @throws Exception
-     * @throws ORMException
      */
     public function get(string $token): string
     {

@@ -9,8 +9,6 @@ use Core\Tools\Other;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMInvalidArgumentException;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -32,7 +30,6 @@ class EmailService
      * @param string $email
      * @return string
      * @throws ORMException
-     * @throws OptimisticLockException
      * @throws Exception
      * @throws InternalError
      */
@@ -83,8 +80,6 @@ class EmailService
      * @return bool
      * @throws InvalidParameter
      * @throws ORMException
-     * @throws ORMInvalidArgumentException
-     * @throws OptimisticLockException
      */
     public function confirmCode(string $code, string $hash, int $needRemove = 0): bool
     {

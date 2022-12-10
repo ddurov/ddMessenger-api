@@ -14,10 +14,23 @@ use Rakit\Validation\Validator;
 
 class TokenController extends Controller
 {
+    private TokenService $tokenService;
+    private SessionService $sessionService;
+
+    /**
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function __construct()
+    {
+        $this->tokenService = new TokenService(Database::getInstance());
+        $this->sessionService = new SessionService(Database::getInstance());
+        parent::__construct();
+    }
+
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
      * @throws ORMException
      */
     public function create(): void
@@ -30,10 +43,10 @@ class TokenController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new SessionService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
+        $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
         (new Response())->setResponse(["token" =>
-            (new TokenService(Database::getInstance()))->create(
+            $this->tokenService->create(
                 (int) parent::$inputData["data"]["tokenType"],
                 parent::$inputData["headers"]["HTTP_SESSION_ID"]
             )
@@ -43,8 +56,6 @@ class TokenController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function get(): void
     {
@@ -56,10 +67,10 @@ class TokenController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new SessionService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
+        $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
         (new Response())->setResponse(["token" =>
-            (new TokenService(Database::getInstance()))->get(
+            $this->tokenService->get(
                 (int) parent::$inputData["data"]["tokenType"],
                 parent::$inputData["headers"]["HTTP_SESSION_ID"]
             )
@@ -69,8 +80,6 @@ class TokenController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function check(): void
     {
@@ -82,10 +91,10 @@ class TokenController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new SessionService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
+        $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
         (new Response())->setResponse(["valid" =>
-            (new TokenService(Database::getInstance()))->check(
+            $this->tokenService->check(
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
         ])->send();

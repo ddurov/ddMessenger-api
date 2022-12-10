@@ -14,11 +14,24 @@ use Rakit\Validation\Validator;
 
 class MessageController extends Controller
 {
+    private MessageService $messageService;
+    private TokenService $tokenService;
+
+    /**
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function __construct()
+    {
+        $this->messageService = new MessageService(Database::getInstance());
+        $this->tokenService = new TokenService(Database::getInstance());
+        parent::__construct();
+    }
+
     /**
      * @return void
      * @throws EntityNotFound
      * @throws ORMException
-     * @throws Exception
      */
     public function send(): void
     {
@@ -31,10 +44,10 @@ class MessageController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(["id" =>
-            (new MessageService(Database::getInstance()))->send(
+            $this->messageService->send(
                 (int) parent::$inputData["data"]["aId"],
                 parent::$inputData["data"]["text"],
                 parent::$inputData["headers"]["HTTP_TOKEN"]
@@ -45,7 +58,6 @@ class MessageController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
      * @throws ORMException
      */
     public function getHistory(): void
@@ -58,10 +70,10 @@ class MessageController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            (new MessageService(Database::getInstance()))->getHistory(
+            $this->messageService->getHistory(
                 (int) parent::$inputData["data"]["aId"],
                 parent::$inputData["data"]["offset"] ?? null,
                 parent::$inputData["headers"]["HTTP_TOKEN"]
@@ -72,8 +84,6 @@ class MessageController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function getDialogs(): void
     {
@@ -84,10 +94,10 @@ class MessageController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            (new MessageService(Database::getInstance()))->getDialogs(parent::$inputData["headers"]["HTTP_TOKEN"])
+            $this->messageService->getDialogs(parent::$inputData["headers"]["HTTP_TOKEN"])
         )->send();
     }
 }

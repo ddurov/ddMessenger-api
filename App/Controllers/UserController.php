@@ -15,19 +15,34 @@ use Core\Exceptions\EntityNotFound;
 use Core\Exceptions\InvalidParameter;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 use Rakit\Validation\Validator;
 
 class UserController extends Controller
 {
+    private UserService $userService;
+    private EmailService $emailService;
+    private SessionService $sessionService;
+    private TokenService $tokenService;
+
+    /**
+     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function __construct()
+    {
+        $this->userService = new UserService(Database::getInstance());
+        $this->emailService = new EmailService(Database::getInstance(), Mailer::getInstance());
+        $this->sessionService = new SessionService(Database::getInstance());
+        $this->tokenService = new TokenService(Database::getInstance());
+        parent::__construct();
+    }
+
     /**
      * @return void
      * @throws EntityExists
-     * @throws Exception
      * @throws InvalidParameter
      * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function register(): void
     {
@@ -46,9 +61,9 @@ class UserController extends Controller
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
             throw new InvalidParameter("username shouldn't contains (a)id prefix");
 
-        (new EmailService(Database::getInstance(), Mailer::getInstance()))->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
+        $this->emailService->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
 
-        (new Response())->setResponse(["aId" => (new UserService(Database::getInstance()))->register(
+        (new Response())->setResponse(["aId" => $this->userService->register(
             parent::$inputData["data"]["login"],
             parent::$inputData["data"]["password"],
             parent::$inputData["data"]["username"],
@@ -73,7 +88,7 @@ class UserController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new Response())->setResponse(["sessionId" => (new UserService(Database::getInstance()))->auth(
+        (new Response())->setResponse(["sessionId" => $this->userService->auth(
             parent::$inputData["data"]["login"],
             parent::$inputData["data"]["password"]
         )])->send();
@@ -82,11 +97,8 @@ class UserController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
      * @throws InvalidParameter
      * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function resetPassword(): void
     {
@@ -100,11 +112,11 @@ class UserController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new SessionService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
+        $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
-        (new EmailService(Database::getInstance(), Mailer::getInstance()))->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
+        $this->emailService->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
 
-        (new Response())->setResponse(["success" => (new UserService(Database::getInstance()))->resetPassword(
+        (new Response())->setResponse(["success" => $this->userService->resetPassword(
             parent::$inputData["data"]["newPassword"],
             parent::$inputData["headers"]["HTTP_SESSION_ID"]
         )])->send();
@@ -113,8 +125,6 @@ class UserController extends Controller
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      * @throws InvalidParameter
      */
     public function changeName(): void
@@ -130,18 +140,16 @@ class UserController extends Controller
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["newName"]))
             throw new InvalidParameter("newName shouldn't contains (a)id prefix");
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(["changed" =>
-            (new UserService(Database::getInstance()))->changeName(parent::$inputData["data"]["newName"], parent::$inputData["headers"]["HTTP_TOKEN"])
+            $this->userService->changeName(parent::$inputData["data"]["newName"], parent::$inputData["headers"]["HTTP_TOKEN"])
         ])->send();
     }
 
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function get(): void
     {
@@ -153,18 +161,16 @@ class UserController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            (new UserService(Database::getInstance()))->get((int) parent::$inputData["data"]["aId"], parent::$inputData["headers"]["HTTP_TOKEN"])
+            $this->userService->get((int) parent::$inputData["data"]["aId"], parent::$inputData["headers"]["HTTP_TOKEN"])
         )->send();
     }
 
     /**
      * @return void
      * @throws EntityNotFound
-     * @throws Exception
-     * @throws ORMException
      */
     public function search(): void
     {
@@ -176,10 +182,10 @@ class UserController extends Controller
         if (isset($validation->errors->all()[0]))
             (new Response())->setStatus("error")->setCode(400)->setResponse(["message" => $validation->errors->all()[0]])->send();
 
-        (new TokenService(Database::getInstance()))->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            (new UserService(Database::getInstance()))->search(parent::$inputData["data"]["query"])
+            $this->userService->search(parent::$inputData["data"]["query"])
         )->send();
     }
 }
