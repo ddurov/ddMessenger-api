@@ -11,7 +11,6 @@ use Core\Exceptions\InvalidParameter;
 use Api\Services\EmailService;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
-use Rakit\Validation\Validator;
 
 class EmailController extends Controller
 {
