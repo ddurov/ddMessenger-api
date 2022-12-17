@@ -46,7 +46,7 @@ class UserController extends Controller
     public function register(): void
     {
         parent::validateData(parent::$inputData["data"], [
-            "login" => "required|between:6,20|regex:/\w+/",
+            "login" => "required|between:6,64|regex:/\w+/",
             "password" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/",
             "username" => "required",
             "email" => "required|regex:/(.*)@([\w\-\.]+)\.([\w]+)/",
