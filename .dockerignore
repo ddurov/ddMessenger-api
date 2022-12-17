@@ -1,3 +1,4 @@
+vendor/
 composer.lock
 Makefile
 template.env
