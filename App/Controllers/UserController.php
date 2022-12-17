@@ -47,7 +47,7 @@ class UserController extends Controller
     {
         parent::validateData(parent::$inputData["data"], [
             "login" => "required|between:6,64|regex:/\w+/",
-            "password" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/",
+            "password" => "required|min:8",
             "username" => "required",
             "email" => "required|regex:/(.*)@([\w\-\.]+)\.([\w]+)/",
             "emailCode" => "required",
@@ -78,7 +78,7 @@ class UserController extends Controller
     {
         parent::validateData(parent::$inputData["data"], [
             "login" => "required|between:6,64|regex:/\w+/",
-            "password" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/"
+            "password" => "required|min:8"
         ]);
 
         (new Response())->setResponse(["sessionId" => $this->userService->auth(
@@ -96,7 +96,7 @@ class UserController extends Controller
     public function resetPassword(): void
     {
         parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
-            "newPassword" => "required|min:8|regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/",
+            "newPassword" => "required|min:8",
             "emailCode" => "required",
             "hash" => "required",
             "HTTP_SESSION_ID" => "required"
