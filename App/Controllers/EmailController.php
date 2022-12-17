@@ -41,7 +41,9 @@ class EmailController extends Controller
         ]);
 
         (new Response())->setResponse(["hash" =>
-            $this->emailService->createCode(parent::$inputData["data"]["email"])
+            $this->emailService->createCode(
+                parent::$inputData["data"]["email"]
+            )
         ])->send();
     }
 

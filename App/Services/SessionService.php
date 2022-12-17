@@ -32,7 +32,11 @@ class SessionService
      */
     public function create(string $token): string
     {
-        return $this->_create($this->entityManager->getRepository(TokenModel::class)->findOneBy(["token" => $token])->getAId());
+        return $this->_create(
+            $this->entityManager->getRepository(TokenModel::class)->findOneBy(
+                ["token" => $token]
+            )->getAId()
+        );
     }
 
     /**
@@ -61,7 +65,9 @@ class SessionService
         $newSession->setSessionId($sessionId);
         $newSession->setAId($aId);
         $newSession->setAuthTime(time());
-        $newSession->setAuthDevice(((new Mobile_Detect())->isMobile() || (new Mobile_Detect())->isTablet()) ? 1 : 0);
+        $newSession->setAuthDevice(
+            ((new Mobile_Detect())->isMobile() || (new Mobile_Detect())->isTablet()) ? 1 : 0
+        );
         $newSession->setAuthIP($_SERVER['REMOTE_ADDR']);
 
         $this->entityManager->persist($newSession);
@@ -80,7 +86,9 @@ class SessionService
     public function get(string $token): string
     {
         return $this->entityRepository->findOneBy(["aId" =>
-            $this->entityManager->getRepository(TokenModel::class)->findOneBy(["token" => $token])->getAId()
+            $this->entityManager->getRepository(TokenModel::class)->findOneBy(
+                ["token" => $token]
+            )->getAId()
         ])->getSessionId();
     }
 

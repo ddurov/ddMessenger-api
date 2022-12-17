@@ -141,7 +141,7 @@ class MessageService
     }
 
     /**
-     * Возвращает список диалог
+     * Возвращает список диалогов
      * @param string $token
      * @return array
      * @throws EntityNotFound
@@ -178,7 +178,13 @@ class MessageService
     {
         $ivLength = openssl_cipher_iv_length($cipher = "aes-128-cbc");
         $iv = openssl_random_pseudo_bytes($ivLength);
-        $ciphertext_raw = openssl_encrypt($message, $cipher, getenv("MESSAGES_ENCRYPTION_KEY"), OPENSSL_RAW_DATA, $iv);
+        $ciphertext_raw = openssl_encrypt(
+            $message,
+            $cipher,
+            getenv("MESSAGES_ENCRYPTION_KEY"),
+            OPENSSL_RAW_DATA,
+            $iv
+        );
         $hmac = hash_hmac('sha256', $ciphertext_raw, getenv("MESSAGES_ENCRYPTION_KEY"), true);
         return base64_encode($iv . $hmac . $ciphertext_raw);
     }
@@ -194,6 +200,12 @@ class MessageService
         $iv = substr($c, 0, $ivLength);
         substr($c, $ivLength, $sha2len = 32);
         $cipherTextRaw = substr($c, $ivLength + $sha2len);
-        return openssl_decrypt($cipherTextRaw, $cipher, getenv("MESSAGES_ENCRYPTION_KEY"), OPENSSL_RAW_DATA, $iv);
+        return openssl_decrypt(
+            $cipherTextRaw,
+            $cipher,
+            getenv("MESSAGES_ENCRYPTION_KEY"),
+            OPENSSL_RAW_DATA,
+            $iv
+        );
     }
 }

@@ -57,14 +57,18 @@ class UserController extends Controller
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
             throw new InvalidParameter("username shouldn't contains (a)id prefix");
 
-        $this->emailService->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
+        $this->emailService->confirmCode(
+            parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1
+        );
 
-        (new Response())->setResponse(["aId" => $this->userService->register(
-            parent::$inputData["data"]["login"],
-            parent::$inputData["data"]["password"],
-            parent::$inputData["data"]["username"],
-            parent::$inputData["data"]["email"],
-        )])->send();
+        (new Response())->setResponse(["aId" =>
+            $this->userService->register(
+                parent::$inputData["data"]["login"],
+                parent::$inputData["data"]["password"],
+                parent::$inputData["data"]["username"],
+                parent::$inputData["data"]["email"]
+            )
+        ])->send();
     }
 
     /**
@@ -81,10 +85,12 @@ class UserController extends Controller
             "password" => "required|min:8"
         ]);
 
-        (new Response())->setResponse(["sessionId" => $this->userService->auth(
-            parent::$inputData["data"]["login"],
-            parent::$inputData["data"]["password"]
-        )])->send();
+        (new Response())->setResponse(["sessionId" =>
+            $this->userService->auth(
+                parent::$inputData["data"]["login"],
+                parent::$inputData["data"]["password"]
+            )
+        ])->send();
     }
 
     /**
@@ -104,12 +110,17 @@ class UserController extends Controller
 
         $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
-        $this->emailService->confirmCode(parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1);
+        $this->emailService->confirmCode(
+            parent::$inputData["data"]["emailCode"],
+            parent::$inputData["data"]["hash"], 1
+        );
 
-        (new Response())->setResponse(["success" => $this->userService->resetPassword(
+        $this->userService->resetPassword(
             parent::$inputData["data"]["newPassword"],
             parent::$inputData["headers"]["HTTP_SESSION_ID"]
-        )])->send();
+        );
+
+        (new Response())->setResponse(["success" => true])->send();
     }
 
     /**
@@ -129,9 +140,12 @@ class UserController extends Controller
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new Response())->setResponse(["changed" =>
-            $this->userService->changeName(parent::$inputData["data"]["newName"], parent::$inputData["headers"]["HTTP_TOKEN"])
-        ])->send();
+        $this->userService->changeName(
+            parent::$inputData["data"]["newName"],
+            parent::$inputData["headers"]["HTTP_TOKEN"]
+        );
+
+        (new Response())->setResponse(["success" => true])->send();
     }
 
     /**
@@ -149,7 +163,10 @@ class UserController extends Controller
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            $this->userService->get((int) parent::$inputData["data"]["aId"], parent::$inputData["headers"]["HTTP_TOKEN"])
+            $this->userService->get(
+                (int) parent::$inputData["data"]["aId"],
+                parent::$inputData["headers"]["HTTP_TOKEN"]
+            )
         )->send();
     }
 
@@ -168,7 +185,9 @@ class UserController extends Controller
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            $this->userService->search(parent::$inputData["data"]["query"])
+            $this->userService->search(
+                parent::$inputData["data"]["query"]
+            )
         )->send();
     }
 }

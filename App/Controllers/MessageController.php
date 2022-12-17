@@ -91,7 +91,9 @@ class MessageController extends Controller
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
         (new Response())->setResponse(
-            $this->messageService->getDialogs(parent::$inputData["headers"]["HTTP_TOKEN"])
+            $this->messageService->getDialogs(
+                parent::$inputData["headers"]["HTTP_TOKEN"]
+            )
         )->send();
     }
 }

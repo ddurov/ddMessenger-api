@@ -75,9 +75,11 @@ class UserService
         /** @var UserModel $account */
         $account = $this->entityRepository->findOneBy(["login" => $login]);
 
-        if ($account === null) throw new EntityNotFound("current entity 'account by login' not found");
+        if ($account === null)
+            throw new EntityNotFound("current entity 'account by login' not found");
 
-        if (md5($password . $account->getPasswordSalt()) !== $account->getPassword()) throw new InvalidParameter("parameter 'password' are invalid");
+        if (md5($password . $account->getPasswordSalt()) !== $account->getPassword())
+            throw new InvalidParameter("parameter 'password' are invalid");
 
         /*
         $ban = Database::getInstance()->query("SELECT * FROM general.bans WHERE eid = ?i", $accountAsArray['id']);
@@ -106,10 +108,10 @@ class UserService
      * * TODO: Сделать удаление всех авторизованных сессий и токенов кроме текущей
      * @param string $newPassword
      * @param string $sessionId
-     * @return bool
+     * @return void
      * @throws ORMException
      */
-    public function resetPassword(string $newPassword, string $sessionId): bool
+    public function resetPassword(string $newPassword, string $sessionId): void
     {
         $salt = bin2hex(openssl_random_pseudo_bytes(16));
 
@@ -124,19 +126,17 @@ class UserService
         $account->setPasswordSalt($salt);
 
         $this->entityManager->flush();
-
-        return true;
     }
 
     /**
      * Изменяет имя пользователя
      * @param string $newName
      * @param string $token
-     * @return bool
+     * @return void
      * @throws EntityNotFound
      * @throws InvalidParameter
      */
-    public function changeName(string $newName, string $token): bool
+    public function changeName(string $newName, string $token): void
     {
         /** @var UserModel $account */
         $account = $this->entityRepository->find((new UserService($this->entityManager))->get(null, $token)["aId"]);
@@ -145,8 +145,6 @@ class UserService
             throw new InvalidParameter("newName hasn't been changed");
 
         $account->setUsername($newName);
-
-        return true;
     }
 
     /**

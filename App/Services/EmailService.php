@@ -61,7 +61,9 @@ class EmailService
         $this->mailer->addAddress($email);
         $this->mailer->isHTML();
         $this->mailer->Subject = "Код подтверждения";
-        $this->mailer->Body = "Код подтверждения: <b>$code</b><br>Данный код будет активен в течение часа с момента получения письма<br><b>Если Вы не запрашивали данное письмо — немедленно смените пароль</b>";
+        $this->mailer->Body = "Код подтверждения: <b>$code</b><br>
+                               Данный код будет активен в течение часа с момента получения письма<br>
+                               <b>Если Вы не запрашивали данное письмо — немедленно смените пароль</b>";
         if (!$this->mailer->send()) {
             Other::log($this->mailer->ErrorInfo);
             throw new InternalError("mail hasn't been sent, internal error");
@@ -86,9 +88,11 @@ class EmailService
         /** @var EmailModel $codeDetails */
         $codeDetails = $this->entityRepository->findOneBy(["code" => $code, "hash" => $hash]);
 
-        if ($codeDetails === null || $codeDetails->getCode() !== $code) throw new InvalidParameter("parameter 'code' are invalid");
+        if ($codeDetails === null || $codeDetails->getCode() !== $code)
+            throw new InvalidParameter("parameter 'code' are invalid");
 
-        if ($codeDetails->getHash() !== $hash) throw new InvalidParameter("parameter 'hash' are invalid");
+        if ($codeDetails->getHash() !== $hash)
+            throw new InvalidParameter("parameter 'hash' are invalid");
 
         if ($needRemove === 1) $this->entityManager->remove($codeDetails);
 

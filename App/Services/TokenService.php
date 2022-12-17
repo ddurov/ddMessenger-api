@@ -32,7 +32,11 @@ class TokenService
         $token = bin2hex(openssl_random_pseudo_bytes(48));
 
         $newToken = new TokenModel();
-        $newToken->setAId($this->entityManager->getRepository(SessionModel::class)->findOneBy(["sessionId" => $sessionId])->getAId());
+        $newToken->setAId(
+            $this->entityManager->getRepository(SessionModel::class)->findOneBy(
+                ["sessionId" => $sessionId]
+            )->getAId()
+        );
         $newToken->setToken($token);
         $newToken->setTokenType($tokenType);
 
@@ -51,7 +55,10 @@ class TokenService
     public function get(int $tokenType, string $sessionId): string
     {
         return $this->entityRepository->findOneBy(
-            ["aId" => $this->entityManager->getRepository(SessionModel::class)->findOneBy(["sessionId" => $sessionId])->getAId(),
+            ["aId" =>
+                $this->entityManager->getRepository(SessionModel::class)->findOneBy(
+                    ["sessionId" => $sessionId]
+                )->getAId(),
                 "tokenType" => $tokenType
             ])->getToken();
     }
