@@ -1,0 +1,29 @@
+version: '3'
+services:
+  app:
+    build: ./php
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./../.env
+    volumes:
+      - ./logs/:/tmp/ddLogs/
+      - ./../app:/var/www/app
+      - ./../web:/var/www/web
+      - ./../vendor:/var/www/vendor
+    links:
+      - db
+    restart: unless-stopped
+  db:
+    image: postgres:latest
+    command: -p ${DATABASE_PORT}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: "/var/lib/postgresql/data/pgdata"

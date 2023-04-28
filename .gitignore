@@ -1,4 +1,5 @@
 vendor/
 .idea/
+docker/logs/**/*.log
 composer.lock
 .env
