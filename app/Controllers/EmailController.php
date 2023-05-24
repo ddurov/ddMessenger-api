@@ -7,7 +7,7 @@ use Api\Singletones\Mailer;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\InternalError;
-use Core\Exceptions\InvalidParameter;
+use Core\Exceptions\ParametersException;
 use Api\Services\EmailService;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
@@ -30,9 +30,8 @@ class EmailController extends Controller
     /**
      * @return void
      * @throws InternalError
-     * @throws InvalidParameter
      * @throws ORMException
-     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws \PHPMailer\PHPMailer\Exception|ParametersException
      */
     public function createCode(): void
     {
@@ -49,8 +48,7 @@ class EmailController extends Controller
 
     /**
      * @return void
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException
      */
     public function confirmCode(): void
     {

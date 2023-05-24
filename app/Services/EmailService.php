@@ -3,7 +3,7 @@
 namespace Api\Services;
 
 use Core\Exceptions\InternalError;
-use Core\Exceptions\InvalidParameter;
+use Core\Exceptions\ParametersException;
 use Api\Models\EmailModel;
 use Core\Tools\Other;
 use Doctrine\ORM\EntityManager;
@@ -80,8 +80,7 @@ class EmailService
      * @param string $hash
      * @param int $needRemove
      * @return bool
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException
      */
     public function confirmCode(string $code, string $hash, int $needRemove = 0): bool
     {
@@ -89,10 +88,10 @@ class EmailService
         $codeDetails = $this->entityRepository->findOneBy(["code" => $code, "hash" => $hash]);
 
         if ($codeDetails === null || $codeDetails->getCode() !== $code)
-            throw new InvalidParameter("parameter 'code' are invalid");
+            throw new ParametersException("parameter 'code' are invalid");
 
         if ($codeDetails->getHash() !== $hash)
-            throw new InvalidParameter("parameter 'hash' are invalid");
+            throw new ParametersException("parameter 'hash' are invalid");
 
         if ($needRemove === 1) $this->entityManager->remove($codeDetails);
 

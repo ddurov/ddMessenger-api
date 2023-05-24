@@ -10,9 +10,8 @@ use Api\Singletones\Database;
 use Api\Singletones\Mailer;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
-use Core\Exceptions\EntityExists;
-use Core\Exceptions\EntityNotFound;
-use Core\Exceptions\InvalidParameter;
+use Core\Exceptions\EntityException;
+use Core\Exceptions\ParametersException;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
 
@@ -39,9 +38,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityExists
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException|EntityException
      */
     public function register(): void
     {
@@ -55,7 +52,7 @@ class UserController extends Controller
         ]);
 
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
-            throw new InvalidParameter("username shouldn't contains (a)id prefix");
+            throw new ParametersException("username shouldn't contains (a)id prefix");
 
         $this->emailService->confirmCode(
             parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1
@@ -73,10 +70,8 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
      * @throws Exception
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException|EntityException
      */
     public function auth(): void
     {
@@ -95,9 +90,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException|EntityException
      */
     public function resetPassword(): void
     {
@@ -125,8 +118,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ParametersException|EntityException
      */
     public function changeName(): void
     {
@@ -136,7 +128,7 @@ class UserController extends Controller
         ]);
 
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["newName"]))
-            throw new InvalidParameter("newName shouldn't contains (a)id prefix");
+            throw new ParametersException("newName shouldn't contains (a)id prefix");
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
@@ -150,8 +142,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ParametersException|EntityException
      */
     public function get(): void
     {
@@ -172,8 +163,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ParametersException|EntityException
      */
     public function search(): void
     {

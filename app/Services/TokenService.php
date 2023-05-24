@@ -2,9 +2,9 @@
 
 namespace Api\Services;
 
-use Core\Exceptions\EntityNotFound;
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
+use Core\Exceptions\EntityException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
@@ -69,12 +69,12 @@ class TokenService
      * Возвращает true в случае успешной проверки, выбрасывает исключение в ином
      * @param string $token
      * @return bool
-     * @throws EntityNotFound
+     * @throws EntityException
      */
     public function check(string $token): bool
     {
         if ($this->entityRepository->findOneBy(["token" => $token]) === null)
-            throw new EntityNotFound("current entity 'token' not found");
+            throw new EntityException("current entity 'token' not found", 404);
 
         return true;
     }

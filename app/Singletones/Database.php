@@ -12,8 +12,7 @@ class Database implements Singleton
     private static ?EntityManager $database = null;
 
     /**
-     * @throws ORMException
-     * @throws Exception
+     * @throws ORMException|Exception
      */
     public static function getInstance(): EntityManager
     {
@@ -23,7 +22,9 @@ class Database implements Singleton
                 getenv("DATABASE_LOGIN"),
                 getenv("DATABASE_PASSWORD"),
                 getenv("DATABASE_SERVER"),
-                __DIR__."/../"
+                (int) getenv("DATABASE_PORT"),
+                __DIR__."/../",
+                "pgsql"
             );
         }
         return self::$database;

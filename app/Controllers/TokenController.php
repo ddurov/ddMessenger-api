@@ -7,8 +7,8 @@ use Api\Services\TokenService;
 use Api\Singletones\Database;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
-use Core\Exceptions\EntityNotFound;
-use Core\Exceptions\InvalidParameter;
+use Core\Exceptions\EntityException;
+use Core\Exceptions\ParametersException;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\ORMException;
 
@@ -30,9 +30,7 @@ class TokenController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
-     * @throws ORMException
+     * @throws ORMException|ParametersException|EntityException
      */
     public function create(): void
     {
@@ -53,8 +51,7 @@ class TokenController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ORMException|ParametersException|EntityException
      */
     public function get(): void
     {
@@ -75,8 +72,7 @@ class TokenController extends Controller
 
     /**
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ParametersException|EntityException
      */
     public function check(): void
     {

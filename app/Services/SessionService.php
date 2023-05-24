@@ -2,9 +2,9 @@
 
 namespace Api\Services;
 
-use Core\Exceptions\EntityNotFound;
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
+use Core\Exceptions\EntityException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
@@ -96,12 +96,12 @@ class SessionService
      * Возвращает true в случае успешной проверки, выбрасывает исключение в ином
      * @param string $sessionId
      * @return bool
-     * @throws EntityNotFound
+     * @throws EntityException
      */
     public function check(string $sessionId): bool
     {
         if ($this->entityRepository->findOneBy(["sessionId" => $sessionId]) === null)
-            throw new EntityNotFound("current entity 'session by id' not found");
+            throw new EntityException("current entity 'session by id' not found", 404);
 
         return true;
     }

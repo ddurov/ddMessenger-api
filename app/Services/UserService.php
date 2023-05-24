@@ -5,9 +5,8 @@ namespace Api\Services;
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
 use Api\Singletones\Database;
-use Core\Exceptions\EntityExists;
-use Core\Exceptions\EntityNotFound;
-use Core\Exceptions\InvalidParameter;
+use Core\Exceptions\EntityException;
+use Core\Exceptions\ParametersException;
 use Api\Models\UserModel;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
@@ -32,16 +31,15 @@ class UserService
      * @param string $username
      * @param string $email
      * @return int
-     * @throws EntityExists
-     * @throws ORMException
+     * @throws ORMException|EntityException
      */
     public function register(string $login, string $password, string $username, string $email): int
     {
         if ($this->entityRepository->findOneBy(["login" => $login]) !== null)
-            throw new EntityExists("current entity 'account by login' are exists");
+            throw new EntityException("current entity 'account by login' are exists", 422);
 
         if ($this->entityRepository->findOneBy(["username" => $username]) !== null)
-            throw new EntityExists("current entity 'account by username' are exists");
+            throw new EntityException("current entity 'account by username' are exists", 422);
 
         $passwordSalt = bin2hex(openssl_random_pseudo_bytes(16));
 
@@ -65,10 +63,10 @@ class UserService
      * @param string $login
      * @param string $password
      * @return string
-     * @throws EntityNotFound
-     * @throws Exception
-     * @throws InvalidParameter
      * @throws ORMException
+     * @throws EntityException
+     * @throws ParametersException
+     * @throws Exception
      */
     public function auth(string $login, string $password): string
     {
@@ -76,10 +74,10 @@ class UserService
         $account = $this->entityRepository->findOneBy(["login" => $login]);
 
         if ($account === null)
-            throw new EntityNotFound("current entity 'account by login' not found");
+            throw new EntityException("current entity 'account by login' not found", 404);
 
         if (md5($password . $account->getPasswordSalt()) !== $account->getPassword())
-            throw new InvalidParameter("parameter 'password' are invalid");
+            throw new ParametersException("parameter 'password' are invalid");
 
         /*
         $ban = Database::getInstance()->query("SELECT * FROM general.bans WHERE eid = ?i", $accountAsArray['id']);
@@ -133,8 +131,7 @@ class UserService
      * @param string $newName
      * @param string $token
      * @return void
-     * @throws EntityNotFound
-     * @throws InvalidParameter
+     * @throws ParametersException
      */
     public function changeName(string $newName, string $token): void
     {
@@ -142,7 +139,7 @@ class UserService
         $account = $this->entityRepository->find((new UserService($this->entityManager))->get(null, $token)["aId"]);
 
         if ($account->getUsername() === $newName)
-            throw new InvalidParameter("newName hasn't been changed");
+            throw new ParametersException("newName hasn't been changed");
 
         $account->setUsername($newName);
     }
@@ -152,14 +149,14 @@ class UserService
      * @param int|null $aId
      * @param string $token
      * @return array
-     * @throws EntityNotFound
+     * @throws EntityException
      */
     public function get(?int $aId, string $token): array
     {
         /** @var UserModel $account */
         $account = $this->entityRepository->find($aId ?? $this->entityManager->getRepository(TokenModel::class)->findOneBy(["token" => $token])->getAId());
 
-        if ($account === null) throw new EntityNotFound("current entity 'account by id' not found");
+        if ($account === null) throw new EntityException("current entity 'account by id' not found", 404);
 
         return [
             "aId" => $account->getId(),
@@ -171,7 +168,7 @@ class UserService
      * Возвращает массив информации найденных пользователей по поисковому запросу
      * @param string $query
      * @return array
-     * @throws EntityNotFound
+     * @throws EntityException
      */
     public function search(string $query): array
     {
@@ -182,7 +179,7 @@ class UserService
             ->getQuery()->getResult();
 
         if ($accounts === [])
-            throw new EntityNotFound("current entities 'accounts by search' not found");
+            throw new EntityException("current entities 'accounts by search' not found", 404);
 
         $preparedData = [];
 
