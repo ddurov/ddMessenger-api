@@ -9,7 +9,7 @@ use Api\Services\UserService;
 use Api\Singletones\Database;
 use Api\Singletones\Mailer;
 use Core\Controllers\Controller;
-use Core\DTO\Response;
+use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityExists;
 use Core\Exceptions\EntityNotFound;
 use Core\Exceptions\InvalidParameter;
@@ -61,14 +61,14 @@ class UserController extends Controller
             parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1
         );
 
-        (new Response())->setResponse(["aId" =>
+        (new SuccessResponse())->setBody(
             $this->userService->register(
                 parent::$inputData["data"]["login"],
                 parent::$inputData["data"]["password"],
                 parent::$inputData["data"]["username"],
                 parent::$inputData["data"]["email"]
             )
-        ])->send();
+        )->send();
     }
 
     /**
@@ -85,12 +85,12 @@ class UserController extends Controller
             "password" => "required|min:8"
         ]);
 
-        (new Response())->setResponse(["sessionId" =>
+        (new SuccessResponse())->setBody(
             $this->userService->auth(
                 parent::$inputData["data"]["login"],
                 parent::$inputData["data"]["password"]
             )
-        ])->send();
+        )->send();
     }
 
     /**
@@ -120,7 +120,7 @@ class UserController extends Controller
             parent::$inputData["headers"]["HTTP_SESSION_ID"]
         );
 
-        (new Response())->setResponse(["success" => true])->send();
+        (new SuccessResponse())->setBody(true)->send();
     }
 
     /**
@@ -145,7 +145,7 @@ class UserController extends Controller
             parent::$inputData["headers"]["HTTP_TOKEN"]
         );
 
-        (new Response())->setResponse(["success" => true])->send();
+        (new SuccessResponse())->setBody(true)->send();
     }
 
     /**
@@ -162,7 +162,7 @@ class UserController extends Controller
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new Response())->setResponse(
+        (new SuccessResponse())->setBody(
             $this->userService->get(
                 (int) parent::$inputData["data"]["aId"],
                 parent::$inputData["headers"]["HTTP_TOKEN"]
@@ -184,7 +184,7 @@ class UserController extends Controller
 
         $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new Response())->setResponse(
+        (new SuccessResponse())->setBody(
             $this->userService->search(
                 parent::$inputData["data"]["query"]
             )

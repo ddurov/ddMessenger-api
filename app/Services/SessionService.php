@@ -5,9 +5,9 @@ namespace Api\Services;
 use Core\Exceptions\EntityNotFound;
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Mobile_Detect;
@@ -81,7 +81,7 @@ class SessionService
      * * TODO: Возвращать предпочтительно уже существующую сессию для типа девайса
      * @param string $token
      * @return string
-     * @throws Exception
+     * @throws NotSupported
      */
     public function get(string $token): string
     {

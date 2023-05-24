@@ -6,7 +6,7 @@ use Api\Services\SessionService;
 use Api\Services\TokenService;
 use Api\Singletones\Database;
 use Core\Controllers\Controller;
-use Core\DTO\Response;
+use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityNotFound;
 use Core\Exceptions\InvalidParameter;
 use Doctrine\DBAL\Exception;
@@ -43,12 +43,12 @@ class TokenController extends Controller
 
         $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
-        (new Response())->setResponse(["token" =>
+        (new SuccessResponse())->setBody(
             $this->tokenService->create(
                 (int) parent::$inputData["data"]["tokenType"],
                 parent::$inputData["headers"]["HTTP_SESSION_ID"]
             )
-        ])->send();
+        )->send();
     }
 
     /**
@@ -65,12 +65,12 @@ class TokenController extends Controller
 
         $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
-        (new Response())->setResponse(["token" =>
+        (new SuccessResponse())->setBody(
             $this->tokenService->get(
                 (int) parent::$inputData["data"]["tokenType"],
                 parent::$inputData["headers"]["HTTP_SESSION_ID"]
             )
-        ])->send();
+        )->send();
     }
 
     /**
@@ -87,10 +87,10 @@ class TokenController extends Controller
 
         $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
 
-        (new Response())->setResponse(["valid" =>
+        (new SuccessResponse())->setBody(
             $this->tokenService->check(
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
-        ])->send();
+        )->send();
     }
 }

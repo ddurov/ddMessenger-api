@@ -5,7 +5,7 @@ namespace Api\Controllers;
 use Api\Singletones\Database;
 use Api\Singletones\Mailer;
 use Core\Controllers\Controller;
-use Core\DTO\Response;
+use Core\DTO\SuccessResponse;
 use Core\Exceptions\InternalError;
 use Core\Exceptions\InvalidParameter;
 use Api\Services\EmailService;
@@ -40,11 +40,11 @@ class EmailController extends Controller
             "email" => "required|email"
         ]);
 
-        (new Response())->setResponse(["hash" =>
+        (new SuccessResponse())->setBody(
             $this->emailService->createCode(
                 parent::$inputData["data"]["email"]
             )
-        ])->send();
+        )->send();
     }
 
     /**
@@ -60,12 +60,12 @@ class EmailController extends Controller
             "needRemove" => "required|numeric"
         ]);
 
-        (new Response())->setResponse(["valid" =>
+        (new SuccessResponse())->setBody(
             $this->emailService->confirmCode(
                 parent::$inputData["data"]["code"],
                 parent::$inputData["data"]["hash"],
                 (int) parent::$inputData["data"]["needRemove"]
             )
-        ])->send();
+        )->send();
     }
 }

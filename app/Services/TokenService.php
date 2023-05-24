@@ -7,6 +7,7 @@ use Api\Models\SessionModel;
 use Api\Models\TokenModel;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 
 class TokenService
@@ -51,6 +52,7 @@ class TokenService
      * @param int $tokenType
      * @param string $sessionId
      * @return string
+     * @throws NotSupported
      */
     public function get(int $tokenType, string $sessionId): string
     {
