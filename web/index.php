@@ -3,10 +3,10 @@
 require_once "../vendor/autoload.php";
 
 use Bramus\Router\Router;
-use Core\DTO\Response;
+use Core\DTO\ErrorResponse;
 use Core\Exceptions\CoreExceptions;
-use Core\Exceptions\FunctionNotPassed;
-use Core\Exceptions\RouteNotFound;
+use Core\Exceptions\ParametersException;
+use Core\Exceptions\RouterException;
 use Core\Tools\Other;
 
 header('Access-Control-Allow-Origin: *');
@@ -24,13 +24,13 @@ try {
     $router->mount("/methods", function () use ($router) {
 
         $router->get("/", function () {
-            throw new FunctionNotPassed("method not passed");
+            throw new ParametersException("method not passed");
         });
 
         $router->mount("/email", function () use ($router) {
 
             $router->get("/", function () {
-                throw new FunctionNotPassed("function not passed");
+                throw new ParametersException("function not passed");
             });
 
             $router->post("/createCode", "EmailController@createCode");
@@ -42,7 +42,7 @@ try {
         $router->mount("/token", function () use ($router) {
 
             $router->get("/", function () {
-                throw new FunctionNotPassed("method not passed");
+                throw new ParametersException("function not passed");
             });
 
             $router->post("/create", "TokenController@create");
@@ -56,7 +56,7 @@ try {
         $router->mount("/session", function () use ($router) {
 
             $router->get("/", function () {
-                throw new FunctionNotPassed("method not passed");
+                throw new ParametersException("function not passed");
             });
 
             $router->post("/create", "SessionController@create");
@@ -70,7 +70,7 @@ try {
         $router->mount("/user", function () use ($router) {
 
             $router->get("/", function () {
-                throw new FunctionNotPassed("method not passed");
+                throw new ParametersException("function not passed");
             });
 
             $router->post("/register", "UserController@register");
@@ -90,7 +90,7 @@ try {
         $router->mount("/messages", function () use ($router) {
 
             $router->get("/", function () {
-                throw new FunctionNotPassed("method not passed");
+                throw new ParametersException("function not passed");
             });
 
             $router->post("/send", "MessageController@send");
@@ -104,18 +104,22 @@ try {
     });
 
     $router->set404(function() {
-        throw new RouteNotFound();
+        throw new RouterException("current route not found for this request method");
     });
 
     $router->run();
 
 } catch (CoreExceptions $coreExceptions) {
 
-    (new Response())->setStatus("error")->setCode($coreExceptions->getCode())->setResponse(["message" => $coreExceptions->getMessage()])->send();
+    (new ErrorResponse())->setCode($coreExceptions->getCode())->setErrorMessage($coreExceptions->getMessage())->send();
 
 } catch (Throwable $exceptions) {
 
-    Other::log("Error: " . $exceptions->getMessage() . " on line: " . $exceptions->getLine() . " in: " . $exceptions->getFile());
-    (new Response())->setStatus("error")->setCode(500)->setResponse(["message" => "internal error, try later"])->send();
+    Other::log(
+        "Error: " . $exceptions->getMessage() .
+        " on line: " . $exceptions->getLine() .
+        " in: " . $exceptions->getFile()
+    );
+    (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 
 }
