@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Api\Singletones;
+namespace Api\Singletone;
 
 use Api\Contracts\Singleton;
 use PHPMailer\PHPMailer\Exception;

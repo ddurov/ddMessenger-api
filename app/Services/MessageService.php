@@ -4,10 +4,10 @@ namespace Api\Services;
 
 use Api\Models\DialogModel;
 use Api\Models\MessageModel;
+use Core\Exceptions\EntityException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\Parameter;
 
@@ -28,7 +28,7 @@ class MessageService
      * @param string $text
      * @param string $token
      * @return int
-     * @throws ORMException
+     * @throws ORMException|EntityException
      */
     public function send(int $aId, string $text, string $token): int
     {
@@ -100,7 +100,7 @@ class MessageService
      * @param int|null $offset
      * @param string $token
      * @return array
-     * @throws ORMException
+     * @throws ORMException|EntityException
      */
     public function getHistory(int $aId, ?int $offset, string $token): array
     {
@@ -142,7 +142,7 @@ class MessageService
      * Возвращает список диалогов
      * @param string $token
      * @return array
-     * @throws NotSupported
+     * @throws ORMException|EntityException
      */
     public function getDialogs(string $token): array
     {

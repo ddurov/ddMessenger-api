@@ -2,7 +2,7 @@
 
 require_once "vendor/autoload.php";
 
-use Api\Singletones\Database;
+use Api\Singletone\Database;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;

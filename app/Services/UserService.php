@@ -4,13 +4,14 @@ namespace Api\Services;
 
 use Api\Models\SessionModel;
 use Api\Models\TokenModel;
-use Api\Singletones\Database;
+use Api\Singletone\Database;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\ParametersException;
 use Api\Models\UserModel;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 
 class UserService
@@ -131,7 +132,7 @@ class UserService
      * @param string $newName
      * @param string $token
      * @return void
-     * @throws ParametersException
+     * @throws ORMException|ParametersException|EntityException
      */
     public function changeName(string $newName, string $token): void
     {
@@ -149,7 +150,7 @@ class UserService
      * @param int|null $aId
      * @param string $token
      * @return array
-     * @throws EntityException
+     * @throws EntityException|NotSupported
      */
     public function get(?int $aId, string $token): array
     {

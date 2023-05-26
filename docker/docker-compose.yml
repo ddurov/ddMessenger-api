@@ -8,9 +8,9 @@ services:
       - ./../.env
     volumes:
       - ./logs/:/tmp/ddLogs/
-      - ./../app:/var/www/app
-      - ./../web:/var/www/web
-      - ./../vendor:/var/www/vendor
+      - ./../app/:/var/www/app/
+      - ./../web/:/var/www/web/
+      - ./../vendor/:/var/www/vendor/
     links:
       - db
     restart: unless-stopped
@@ -27,3 +27,11 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_DB: ${DATABASE_NAME}
       PGDATA: "/var/lib/postgresql/data/pgdata"
+  db-web:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@ddproj.ru
+      PGADMIN_DEFAULT_PASSWORD: ${DATABASE_PASSWORD}

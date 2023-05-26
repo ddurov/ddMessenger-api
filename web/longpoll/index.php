@@ -2,7 +2,7 @@
 
 require_once "../../vendor/autoload.php";
 
-use Core\DTO\Response;
+use Core\DTO\SuccessResponse;
 use Core\Exceptions\CoreExceptions;
 use Core\Tools\Other;
 

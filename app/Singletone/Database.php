@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Api\Singletones;
+namespace Api\Singletone;
 
 use Api\Contracts\Singleton;
 use Doctrine\DBAL\Exception;
@@ -18,7 +18,7 @@ class Database implements Singleton
     {
         if (self::$database === null) {
             self::$database = (new \Core\Database())->create(
-                "ddmessager",
+                getenv("DATABASE_NAME"),
                 getenv("DATABASE_LOGIN"),
                 getenv("DATABASE_PASSWORD"),
                 getenv("DATABASE_SERVER"),
