@@ -118,7 +118,7 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws ParametersException|EntityException
+     * @throws ParametersException|EntityException|ORMException
      */
     public function changeName(): void
     {
