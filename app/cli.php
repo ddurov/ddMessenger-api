@@ -9,6 +9,6 @@ use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
 try {
     ConsoleRunner::run(new SingleManagerProvider(Database::getInstance()));
-} catch (\Doctrine\DBAL\Exception|ORMException $e) {
+} catch (ORMException $e) {
     echo "CLI error: {$e->getMessage()}";
 }

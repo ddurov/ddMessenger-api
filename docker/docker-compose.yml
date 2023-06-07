@@ -3,7 +3,7 @@ services:
   app:
     build: ./php
     ports:
-      - "8001:8001"
+      - "${WEB_PORT}:${WEB_PORT}"
     env_file:
       - ./../.env
     volumes:
@@ -15,23 +15,26 @@ services:
       - db
     restart: unless-stopped
   db:
-    image: postgres:latest
-    command: -p ${DATABASE_PORT}
+    image: mysql:latest
+    command: -P ${DATABASE_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "${DATABASE_PORT}:${DATABASE_PORT}"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_DB: ${DATABASE_NAME}
-      PGDATA: "/var/lib/postgresql/data/pgdata"
+      - ./db_data/:/var/lib/mysql
   db-web:
-    image: dpage/pgadmin4
-    ports:
-      - "5050:80"
-    restart: unless-stopped
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db
     environment:
-      PGADMIN_DEFAULT_EMAIL: root@ddproj.ru
-      PGADMIN_DEFAULT_PASSWORD: ${DATABASE_PASSWORD}
+      PMA_HOST: db
+      PMA_HOSTS: db
+      PMA_PORT: ${DATABASE_PORT}
+      PMA_ARBITRARY: 1
+    restart: unless-stopped
+    ports:
+      - "${WEB_DATABASE_PORT}:80"

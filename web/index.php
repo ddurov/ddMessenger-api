@@ -118,7 +118,8 @@ try {
     Other::log(
         "Error: " . $exceptions->getMessage() .
         " on line: " . $exceptions->getLine() .
-        " in: " . $exceptions->getFile()
+        " in: " . $exceptions->getFile(),
+        "messager"
     );
     (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 

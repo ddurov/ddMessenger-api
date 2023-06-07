@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     	libonig-dev \
     	libzip-dev \
         libpq-dev \
-        && docker-php-ext-install -j$(nproc) mbstring pgsql zip
+        && docker-php-ext-install -j$(nproc) mbstring mysqli zip
 WORKDIR /var/www/
 
 COPY start.sh /tmp/start.sh
