@@ -26,7 +26,7 @@ class UserService
     }
 
     /**
-     * Регистрирует пользователя, возвращает id + sessionId
+     * Регистрирует пользователя, возвращает id
      * @param string $login
      * @param string $password
      * @param string $username
@@ -155,7 +155,11 @@ class UserService
     public function get(?int $aId, string $token): array
     {
         /** @var UserModel $account */
-        $account = $this->entityRepository->find($aId ?? $this->entityManager->getRepository(TokenModel::class)->findOneBy(["token" => $token])->getAId());
+        $account = $this->entityRepository->find(
+            $aId ?? $this->entityManager->getRepository(TokenModel::class)->findOneBy(
+                ["token" => $token]
+            )->getAId()
+        );
 
         if ($account === null) throw new EntityException("current entity 'account by id' not found", 404);
 

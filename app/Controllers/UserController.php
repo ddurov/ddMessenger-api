@@ -43,13 +43,19 @@ class UserController extends Controller
     public function register(): void
     {
         parent::validateData(parent::$inputData["data"], [
-            "login" => "required|between:6,64|regex:/\w+/",
+            "login" => "required|between:6,64",
             "password" => "required|min:8",
-            "username" => "required",
+            "username" => "required|min:4",
             "email" => "required|regex:/(.*)@([\w\-\.]+)\.([\w]+)/",
             "emailCode" => "required",
             "hash" => "required"
         ]);
+
+        if (preg_match("/\W/", parent::$inputData["data"]["login"]))
+            throw new ParametersException("login has incorrect symbols");
+
+        if (preg_match("/\W/", parent::$inputData["data"]["password"]))
+            throw new ParametersException("password has incorrect symbols");
 
         if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
             throw new ParametersException("username shouldn't contains (a)id prefix");
@@ -76,9 +82,15 @@ class UserController extends Controller
     public function auth(): void
     {
         parent::validateData(parent::$inputData["data"], [
-            "login" => "required|between:6,64|regex:/\w+/",
+            "login" => "required|between:6,64",
             "password" => "required|min:8"
         ]);
+
+        if (preg_match("/\W/", parent::$inputData["data"]["login"]))
+            throw new ParametersException("login has incorrect symbols");
+
+        if (preg_match("/\W/", parent::$inputData["data"]["password"]))
+            throw new ParametersException("password has incorrect symbols");
 
         (new SuccessResponse())->setBody(
             $this->userService->auth(
