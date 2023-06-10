@@ -1,5 +1,6 @@
 vendor/
 .idea/
+docker/db_data/**
 docker/logs/**/*.log
 composer.lock
 .env
