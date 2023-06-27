@@ -13,7 +13,11 @@ services:
       - ./../vendor/:/var/www/vendor/
     links:
       - db
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 1s
+        max_attempts: 10
   db:
     image: mysql:latest
     command: -P ${DATABASE_PORT}

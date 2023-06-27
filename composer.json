@@ -19,7 +19,7 @@
 		}
 	],
 	"require": {
-		"ddprojects/core": "dev-master",
+		"ddprojects/core": "dev-main",
 		"ext-openssl": "*"
 	}
 }
