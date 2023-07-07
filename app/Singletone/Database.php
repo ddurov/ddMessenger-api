@@ -5,14 +5,14 @@ namespace Api\Singletone;
 use Api\Contracts\Singleton;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
 
 class Database implements Singleton
 {
     private static ?EntityManager $database = null;
 
     /**
-     * @throws ORMException|Exception
+     * @throws Exception|MissingMappingDriverImplementation
      */
     public static function getInstance(): EntityManager
     {

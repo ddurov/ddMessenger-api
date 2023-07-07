@@ -11,34 +11,24 @@ services:
       - ./../app/:/var/www/app/
       - ./../web/:/var/www/web/
       - ./../vendor/:/var/www/vendor/
-    links:
-      - db
+    # UNCOMMENT ONLY FOR LOCAL DEVELOPMENT
+    #links:
+    #  - db
     deploy:
       restart_policy:
         condition: on-failure
         delay: 1s
         max_attempts: 10
-  db:
-    image: mysql:latest
-    command: -P ${DATABASE_PORT}
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DATABASE_NAME}
-      MYSQL_USER: ${DATABASE_USER}
-      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-    ports:
-      - "${DATABASE_PORT}:${DATABASE_PORT}"
-    volumes:
-      - ./db_data/:/var/lib/mysql
-  db-web:
-    image: phpmyadmin/phpmyadmin
-    links:
-      - db
-    environment:
-      PMA_HOST: db
-      PMA_HOSTS: db
-      PMA_PORT: ${DATABASE_PORT}
-      PMA_ARBITRARY: 1
-    restart: unless-stopped
-    ports:
-      - "${WEB_DATABASE_PORT}:80"
+  # UNCOMMENT ONLY FOR LOCAL DEVELOPMENT
+  #db:
+  #  image: mysql:latest
+  #  command: -P ${DATABASE_PORT}
+  #  environment:
+  #    MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+  #    MYSQL_DATABASE: ${DATABASE_NAME}
+  #    MYSQL_USER: ${DATABASE_USER}
+  #    MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+  #  ports:
+  #    - "${DATABASE_PORT}:${DATABASE_PORT}"
+  #  volumes:
+  #    - ./db_data/:/var/lib/mysql
