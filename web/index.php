@@ -103,6 +103,10 @@ try {
 
     });
 
+    $router->all("/longpoll", function () {
+        require "longpoll/index.php";
+    });
+
     $router->set404(function() {
         throw new RouterException("current route not found for this request method");
     });

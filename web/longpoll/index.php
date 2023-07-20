@@ -1,16 +1,20 @@
 <?php declare(strict_types=1);
 
-require_once "../../vendor/autoload.php";
+require_once "vendor/autoload.php";
 
-use Core\DTO\SuccessResponse;
+use Bramus\Router\Router;
 use Core\Exceptions\CoreExceptions;
 use Core\Tools\Other;
 
-header('Access-Control-Allow-Origin: *');
+$router = new Router();
+$router->setNamespace("\Api\LongPoll\Controllers");
+$router->setBasePath("/longpoll");
 
-/*try {
+try {
 
-    $method = $matches[1];
+    $router->get("/", "EventController@listen");
+
+    /*$method = $matches[1];
 
     if (!isset($method) || $method === "") throw new selfThrows(["message" => "method parameter is missing or null"]);
 
@@ -82,15 +86,22 @@ header('Access-Control-Allow-Origin: *');
         default:
             throw new selfThrows(["message" => "unknown method", "parameters" => $_GET]);
 
-    }
+    }*/
+
+    $router->run();
 
 } catch (CoreExceptions $coreExceptions) {
 
-    (new Response())->setStatus("error")->setCode($coreExceptions->getCode())->setResponse(["message" => $coreExceptions->getMessage()])->send();
+    (new ErrorResponse())->setCode($coreExceptions->getCode())->setErrorMessage($coreExceptions->getMessage())->send();
 
 } catch (Throwable $exceptions) {
 
-    Other::log("Error: " . $exceptions->getMessage() . " on line: " . $exceptions->getLine() . " in: " . $exceptions->getFile());
-    (new Response())->setStatus("error")->setCode(500)->setResponse(["message" => "internal error, try later"])->send();
+    Other::log(
+        "Error: " . $exceptions->getMessage() .
+        " on line: " . $exceptions->getLine() .
+        " in: " . $exceptions->getFile(),
+        "messagerLongPoll"
+    );
+    (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 
-}*/
+}

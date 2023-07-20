@@ -2,7 +2,8 @@
 	"name": "ddprojects/messager-api",
 	"autoload": {
 		"psr-4": {
-			"Api\\": "app/"
+			"Api\\": "app/",
+			"LongPoll\\": "app/LongPoll"
 		}
 	},
 	"authors": [
