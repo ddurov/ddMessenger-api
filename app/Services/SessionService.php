@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Mobile_Detect;
 
 class SessionService
 {
@@ -66,7 +65,7 @@ class SessionService
         $newSession->setAId($aId);
         $newSession->setAuthTime(time());
         $newSession->setAuthDevice(
-            ((new Mobile_Detect())->isMobile() || (new Mobile_Detect())->isTablet()) ? 1 : 0
+            (preg_match("/dd(.*)App/m", $_SERVER["HTTP_USER_AGENT"])) ? 1 : 0
         );
         $newSession->setAuthIP($_SERVER['REMOTE_ADDR']);
 
@@ -78,7 +77,6 @@ class SessionService
 
     /**
      * Возвращает 1 сессию
-     * * TODO: Возвращать предпочтительно уже существующую сессию для типа девайса
      * @param string $token
      * @return string
      * @throws NotSupported
