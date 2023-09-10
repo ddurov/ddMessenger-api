@@ -57,9 +57,6 @@ class UserController extends Controller
         if (preg_match("#[^a-zA-Z0-9@$!%*?&+~|{}:;<>/.]+#", parent::$inputData["data"]["password"]))
             throw new ParametersException("password has incorrect symbols");
 
-        if (preg_match("/^a?id\d+/", parent::$inputData["data"]["username"]))
-            throw new ParametersException("username shouldn't contains (a)id prefix");
-
         $this->emailService->confirmCode(
             parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1
         );

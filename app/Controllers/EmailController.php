@@ -39,6 +39,12 @@ class EmailController extends Controller
             "email" => "required|email"
         ]);
 
+        if (
+            preg_match("/(.*)@ddproj.ru/", parent::$inputData["data"]["email"]) &&
+            !getenv("MAIL_ALLOW_SENDING_TO_LOCAL")
+        )
+            throw new ParametersException("email parameter shouldn't include \"ddproj.ru\"", );
+
         (new SuccessResponse())->setBody(
             $this->emailService->createCode(
                 parent::$inputData["data"]["email"]
