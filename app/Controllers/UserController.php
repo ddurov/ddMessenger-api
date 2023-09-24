@@ -156,7 +156,7 @@ class UserController extends Controller
     public function get(): void
     {
         parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
-            "aId" => "required|numeric",
+            "aId" => "numeric",
             "HTTP_TOKEN" => "required"
         ]);
 
@@ -164,7 +164,7 @@ class UserController extends Controller
 
         (new SuccessResponse())->setBody(
             $this->userService->get(
-                (int) parent::$inputData["data"]["aId"],
+                parent::$inputData["data"]["aId"],
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
         )->send();

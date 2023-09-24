@@ -43,7 +43,7 @@ class TokenController extends Controller
 
         (new SuccessResponse())->setBody(
             $this->tokenService->create(
-                (int) parent::$inputData["data"]["tokenType"],
+                parent::$inputData["data"]["tokenType"],
                 parent::$inputData["headers"]["HTTP_SESSION_ID"]
             )
         )->send();

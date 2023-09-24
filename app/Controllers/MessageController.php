@@ -44,7 +44,7 @@ class MessageController extends Controller
 
         (new SuccessResponse())->setBody(
             $this->messageService->send(
-                (int) parent::$inputData["data"]["aId"],
+                parent::$inputData["data"]["aId"],
                 parent::$inputData["data"]["text"],
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
@@ -66,7 +66,7 @@ class MessageController extends Controller
 
         (new SuccessResponse())->setBody(
             $this->messageService->getHistory(
-                (int) parent::$inputData["data"]["aId"],
+                parent::$inputData["data"]["aId"],
                 parent::$inputData["data"]["offset"] ?? null,
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )

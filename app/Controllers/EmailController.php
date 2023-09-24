@@ -68,7 +68,7 @@ class EmailController extends Controller
             $this->emailService->confirmCode(
                 parent::$inputData["data"]["code"],
                 parent::$inputData["data"]["hash"],
-                (int) parent::$inputData["data"]["needRemove"]
+                parent::$inputData["data"]["needRemove"]
             )
         )->send();
     }
