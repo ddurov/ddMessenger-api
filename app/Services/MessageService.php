@@ -174,17 +174,22 @@ class MessageService
      */
     private function encryptMessage(string $message): string
     {
-        $ivLength = openssl_cipher_iv_length($cipher = "aes-128-cbc");
-        $iv = openssl_random_pseudo_bytes($ivLength);
-        $ciphertext_raw = openssl_encrypt(
+        $iv = openssl_random_pseudo_bytes(
+            openssl_cipher_iv_length($cipher = 'aes-256-ctr')
+        );
+        $rawEncrypted = openssl_encrypt(
             $message,
             $cipher,
             getenv("MESSAGES_ENCRYPTION_KEY"),
             OPENSSL_RAW_DATA,
-            $iv
+            $iv);
+        $hmac = hash_hmac(
+            'sha256',
+            $rawEncrypted,
+            getenv("MESSAGES_ENCRYPTION_KEY"),
+            true
         );
-        $hmac = hash_hmac('sha256', $ciphertext_raw, getenv("MESSAGES_ENCRYPTION_KEY"), true);
-        return base64_encode($iv . $hmac . $ciphertext_raw);
+        return base64_encode($iv . $hmac . $rawEncrypted);
     }
 
     /**
@@ -193,13 +198,12 @@ class MessageService
      */
     private function decryptMessage(string $messageEncoded): string
     {
-        $c = base64_decode($messageEncoded);
-        $ivLength = openssl_cipher_iv_length($cipher = "aes-128-cbc");
-        $iv = substr($c, 0, $ivLength);
-        substr($c, $ivLength, $sha2len = 32);
-        $cipherTextRaw = substr($c, $ivLength + $sha2len);
+        $fullRawDecrypted = base64_decode($messageEncoded);
+        $ivLength = openssl_cipher_iv_length($cipher = 'aes-256-ctr');
+        $iv = substr($fullRawDecrypted, 0, $ivLength);
+        $rawDecrypted = substr($fullRawDecrypted, $ivLength + 32);
         return openssl_decrypt(
-            $cipherTextRaw,
+            $rawDecrypted,
             $cipher,
             getenv("MESSAGES_ENCRYPTION_KEY"),
             OPENSSL_RAW_DATA,
