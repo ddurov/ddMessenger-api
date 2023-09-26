@@ -2,6 +2,7 @@
 
 namespace Api\Services;
 
+use Api\LongPoll\Models\LongPollModel;
 use Api\Models\DialogModel;
 use Api\Models\MessageModel;
 use Core\Exceptions\EntityException;
@@ -75,21 +76,19 @@ class MessageService
         $this->entityManager->persist($newMessage);
         $this->entityManager->flush();
 
-        /* TODO: переделать под орм лонгпул
-         *
-         * Database::getInstance()->query("INSERT INTO longpoll_data (`to`, `data`, isChecked, `date`) VALUES (?i, '?s', 0, UNIX_TIMESTAMP())",
-            $aId,
-            serialize([
-                "eventType" => "newMessage",
-                "eventData" => [
-                    "id" => $messageId,
-                    "peerId" => $aId,
-                    "senderId" => $me["id"],
-                    "message" => MessageService::encryptMessage($text),
-                    "date" => $time
-                ]
-            ])
-        );*/
+        $newEvent = new LongPollModel();
+        $newEvent->setAId($me["aId"]);
+        $newEvent->setData([
+            "type" => "newMessage",
+            "data" => [
+                "id" => $messageId,
+                "peerAId" => $aId,
+                "message" => self::encryptMessage($text),
+                "messageDate" => $time
+            ]
+        ]);
+        $this->entityManager->persist($newEvent);
+        $this->entityManager->flush();
 
         return $messageId;
     }
@@ -172,7 +171,7 @@ class MessageService
      * @param string $message
      * @return string
      */
-    private function encryptMessage(string $message): string
+    public function encryptMessage(string $message): string
     {
         $iv = openssl_random_pseudo_bytes(
             openssl_cipher_iv_length($cipher = 'aes-256-ctr')
@@ -196,7 +195,7 @@ class MessageService
      * @param string $messageEncoded
      * @return string
      */
-    private function decryptMessage(string $messageEncoded): string
+    public static function decryptMessage(string $messageEncoded): string
     {
         $fullRawDecrypted = base64_decode($messageEncoded);
         $ivLength = openssl_cipher_iv_length($cipher = 'aes-256-ctr');
