@@ -2,8 +2,8 @@
 
 namespace Api\Controllers;
 
+use Api\Models\UserModel;
 use Api\Services\EmailService;
-use Api\Services\SessionService;
 use Api\Services\TokenService;
 use Api\Services\UserService;
 use Api\Singletone\Database;
@@ -11,15 +11,17 @@ use Api\Singletone\Mailer;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
+use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 
 class UserController extends Controller
 {
     private UserService $userService;
     private EmailService $emailService;
-    private SessionService $sessionService;
     private TokenService $tokenService;
 
     /**
@@ -31,7 +33,6 @@ class UserController extends Controller
     {
         $this->userService = new UserService(Database::getInstance());
         $this->emailService = new EmailService(Database::getInstance(), Mailer::getInstance());
-        $this->sessionService = new SessionService(Database::getInstance());
         $this->tokenService = new TokenService(Database::getInstance());
         parent::__construct();
     }
@@ -99,27 +100,52 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws ORMException|ParametersException|EntityException
+     * @throws EntityException
+     * @throws Exception
+     * @throws ORMException
+     * @throws ParametersException
+     * @throws InternalError
+     * @throws MissingMappingDriverImplementation
+     * @throws NotSupported
+     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function resetPassword(): void
     {
-        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
-            "newPassword" => "required|min:8",
-            "emailCode" => "required",
-            "hash" => "required",
-            "HTTP_SESSION_ID" => "required"
+        parent::validateData(parent::$inputData["data"], [
+            "login" => "required",
+            "newPassword" => "required|min:8"
         ]);
 
-        $this->sessionService->check(parent::$inputData["headers"]["HTTP_SESSION_ID"]);
+        if (!isset(parent::$inputData["data"]["emailCode"])) {
+            $user = Database::getInstance()->getRepository(UserModel::class)
+                ->findOneBy(["login" => parent::$inputData["data"]["login"]]);
+
+            if ($user === null)
+                throw new EntityException("current entity 'account by login' not found", 404);
+
+            (new SuccessResponse())->setBody(
+                $this->emailService->createCode(
+                    Database::getInstance()->getRepository(UserModel::class)
+                        ->findOneBy(["login" => parent::$inputData["data"]["login"]])
+                        ->getEmail()
+                )
+            )->setCode(202)->send();
+        }
+
+        parent::validateData(parent::$inputData["data"], [
+            "emailCode" => "required",
+            "hash" => "required"
+        ]);
 
         $this->emailService->confirmCode(
             parent::$inputData["data"]["emailCode"],
-            parent::$inputData["data"]["hash"], 1
+            parent::$inputData["data"]["hash"],
+            1
         );
 
         $this->userService->resetPassword(
-            parent::$inputData["data"]["newPassword"],
-            parent::$inputData["headers"]["HTTP_SESSION_ID"]
+            parent::$inputData["data"]["login"],
+            parent::$inputData["data"]["newPassword"]
         );
 
         (new SuccessResponse())->setBody(true)->send();

@@ -51,10 +51,11 @@ class UserModel extends Model
 
     /**
      * @param string $password
+     * @param string $salt
      */
-    public function setPassword(string $password): void
+    public function setPassword(string $password, string $salt): void
     {
-        $this->password = $password;
+        $this->password = md5($password . $salt);
     }
 
     /**

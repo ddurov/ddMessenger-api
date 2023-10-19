@@ -46,7 +46,7 @@ class UserService
 
         $newUser = new UserModel();
         $newUser->setLogin($login);
-        $newUser->setPassword(md5($password.$passwordSalt));
+        $newUser->setPassword($password, $passwordSalt);
         $newUser->setPasswordSalt($passwordSalt);
         $newUser->setEmail($email);
         $newUser->setUsername($username);
@@ -104,24 +104,20 @@ class UserService
 
     /**
      * Изменяет пароль аккаунта, возвращает true
-     * * TODO: Сделать удаление всех авторизованных сессий и токенов кроме текущей
+     * * TODO: Сделать удаление всех авторизованных сессий и токенов
+     * @param string $login
      * @param string $newPassword
-     * @param string $sessionId
      * @return void
      * @throws ORMException
      */
-    public function resetPassword(string $newPassword, string $sessionId): void
+    public function resetPassword(string $login, string $newPassword): void
     {
         $salt = bin2hex(openssl_random_pseudo_bytes(16));
 
         /** @var UserModel $account */
-        $account = $this->entityRepository->findOneBy(
-            ["id" => $this->entityManager->getRepository(SessionModel::class)->findOneBy(
-                ["sessionId" => $sessionId]
-            )->getAid()]
-        );
+        $account = $this->entityRepository->findOneBy(["login" => $login]);
 
-        $account->setPassword(md5($newPassword . $salt));
+        $account->setPassword($newPassword, $salt);
         $account->setPasswordSalt($salt);
 
         $this->entityManager->flush();
