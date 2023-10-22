@@ -10,4 +10,4 @@ if (is_file(__DIR__.$_SERVER['SCRIPT_NAME'])) {
 
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 
-require 'index.php';
+require_once 'index.php';
