@@ -101,10 +101,10 @@ try {
 
         });
 
-    });
+        $router->all("/longpoll", function () {
+            require "longpoll/index.php";
+        });
 
-    $router->all("/longpoll", function () {
-        require "longpoll/index.php";
     });
 
     $router->set404(function() {

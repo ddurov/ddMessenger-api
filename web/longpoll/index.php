@@ -13,7 +13,7 @@ $router->setBasePath("/longpoll");
 
 try {
 
-    $router->get("/", "EventController@listen");
+    $router->get("/listen", "EventController@listen");
 
     $router->run();
 
