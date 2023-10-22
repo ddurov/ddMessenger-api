@@ -101,8 +101,8 @@ try {
 
         });
 
-        $router->all("/longpoll", function () {
-            require "longpoll/index.php";
+        $router->all("/longpoll(/.*)?", function () {
+            require_once "longpoll/index.php";
         });
 
     });

@@ -5,15 +5,25 @@ require_once "vendor/autoload.php";
 use Bramus\Router\Router;
 use Core\DTO\ErrorResponse;
 use Core\Exceptions\CoreExceptions;
+use Core\Exceptions\ParametersException;
+use Core\Exceptions\RouterException;
 use Core\Tools\Other;
 
 $router = new Router();
 $router->setNamespace("\Api\LongPoll\Controllers");
-$router->setBasePath("/longpoll");
+$router->setBasePath("/methods/longpoll/");
 
 try {
 
+    $router->get("/", function () {
+        throw new ParametersException("function not passed");
+    });
+
     $router->get("/listen", "EventController@listen");
+
+    $router->set404(function() {
+        throw new RouterException("current route not found for this request method");
+    });
 
     $router->run();
 
