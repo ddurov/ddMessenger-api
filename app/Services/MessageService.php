@@ -57,6 +57,7 @@ class MessageService
         $newMessage->setMessageDate($time);
 
         if ($dialog !== null) {
+            $dialog->setLastMessageSenderAId($me["aId"]);
             $dialog->setLastMessageId($messageId);
             $dialog->setLastMessageText(self::encryptMessage($text));
             $dialog->setLastMessageDate($time);
@@ -65,6 +66,7 @@ class MessageService
             $newDialog = new DialogModel();
             $newDialog->setFirstId($me["aId"]);
             $newDialog->setSecondId($aId);
+            $newDialog->setLastMessageSenderAId($me["aId"]);
             $newDialog->setLastMessageId($messageId);
             $newDialog->setLastMessageText(self::encryptMessage($text));
             $newDialog->setLastMessageDate($time);
@@ -77,11 +79,12 @@ class MessageService
         $this->entityManager->flush();
 
         $newEvent = new LongPollModel();
-        $newEvent->setAId($me["aId"]);
+        $newEvent->setAId($aId);
         $newEvent->setData([
             "type" => "newMessage",
             "data" => [
                 "id" => $messageId,
+                "senderAId" => $me["aId"],
                 "peerAId" => $aId,
                 "message" => self::encryptMessage($text),
                 "messageDate" => $time
@@ -127,7 +130,7 @@ class MessageService
         foreach ($messages as $message) {
             $preparedData[] = [
                 "id" => $message->getMessageId(),
-                "out" => $message->getSenderAId() === $me["aId"],
+                "senderAId" => $message->getSenderAId(),
                 "peerAId" => $message->getPeerAId(),
                 "message" => self::decryptMessage($message->getMessageText()),
                 "messageDate" => $message->getMessageDate()
@@ -156,8 +159,11 @@ class MessageService
         $preparedData = [];
 
         foreach ($dialogs as $dialog) {
+            $peerAId = $dialog->getFirstId() === $me["aId"] ? $dialog->getSecondId() : $dialog->getFirstId();
+
             $preparedData[] = [
-                "peerAId" => $dialog->getFirstId() === $me["aId"] ? $dialog->getSecondId() : $dialog->getFirstId(),
+                "peerAId" => $peerAId,
+                "lastMessageSenderAId" => $dialog->getLastMessageSenderAId(),
                 "lastMessageId" => $dialog->getLastMessageId(),
                 "lastMessage" => self::decryptMessage($dialog->getLastMessageText()),
                 "lastMessageDate" => $dialog->getLastMessageDate()

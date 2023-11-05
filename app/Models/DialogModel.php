@@ -18,6 +18,8 @@ class DialogModel extends Model
     private int $secondId;
     #[Column(type: Types::INTEGER)]
     private int $lastMessageId;
+    #[Column(type: Types::INTEGER)]
+    private int $lastMessageSenderAId;
     #[Column(type: Types::TEXT)]
     private string $lastMessageText;
     #[Column(type: Types::INTEGER)]
@@ -69,6 +71,22 @@ class DialogModel extends Model
     public function setLastMessageId(int $lastMessageId): void
     {
         $this->lastMessageId = $lastMessageId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastMessageSenderAId(): int
+    {
+        return $this->lastMessageSenderAId;
+    }
+
+    /**
+     * @param int $lastMessageSenderAId
+     */
+    public function setLastMessageSenderAId(int $lastMessageSenderAId): void
+    {
+        $this->lastMessageSenderAId = $lastMessageSenderAId;
     }
 
     /**
