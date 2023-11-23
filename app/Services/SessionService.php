@@ -58,18 +58,13 @@ class SessionService
      */
     private function _create(int $aId): string
     {
-        $sessionId = bin2hex(openssl_random_pseudo_bytes(32));
-
-        $newSession = new SessionModel();
-        $newSession->setSessionId($sessionId);
-        $newSession->setAId($aId);
-        $newSession->setAuthTime(time());
-        $newSession->setAuthDevice(
-            (preg_match("/dd(.*)App/m", $_SERVER["HTTP_USER_AGENT"])) ? 1 : 0
-        );
-        $newSession->setAuthIP($_SERVER['REMOTE_ADDR']);
-
-        $this->entityManager->persist($newSession);
+        $this->entityManager->persist(new SessionModel(
+            $sessionId = bin2hex(openssl_random_pseudo_bytes(32)),
+            $aId,
+            time(),
+            (preg_match("/dd(.*)App/m", $_SERVER["HTTP_USER_AGENT"])) ? 1 : 0,
+            $_SERVER['REMOTE_ADDR']
+        ));
         $this->entityManager->flush();
 
         return $sessionId;

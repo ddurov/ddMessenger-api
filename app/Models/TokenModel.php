@@ -20,19 +20,26 @@ class TokenModel extends Model
     private int $tokenType;
 
     /**
+     * @param int $aId
+     * @param string $token
+     * @param int $tokenType
+     */
+    public function __construct(
+        int $aId,
+        string $token,
+        int $tokenType
+    ) {
+        $this->aId = $aId;
+        $this->token = $token;
+        $this->tokenType = $tokenType;
+    }
+
+    /**
      * @return int
      */
     public function getAId(): int
     {
         return $this->aId;
-    }
-
-    /**
-     * @param int $aId
-     */
-    public function setAId(int $aId): void
-    {
-        $this->aId = $aId;
     }
 
     /**
@@ -44,26 +51,10 @@ class TokenModel extends Model
     }
 
     /**
-     * @param string $token
-     */
-    public function setToken(string $token): void
-    {
-        $this->token = $token;
-    }
-
-    /**
      * @return int
      */
     public function getTokenType(): int
     {
         return $this->tokenType;
-    }
-
-    /**
-     * @param int $tokenType
-     */
-    public function setTokenType(int $tokenType): void
-    {
-        $this->tokenType = $tokenType;
     }
 }

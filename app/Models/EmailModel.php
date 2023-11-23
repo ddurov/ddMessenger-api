@@ -24,6 +24,27 @@ class EmailModel extends Model
     private string $hash;
 
     /**
+     * @param string $code
+     * @param string $email
+     * @param int $requestTime
+     * @param string $requestIP
+     * @param string $hash
+     */
+    public function __construct(
+        string $code,
+        string $email,
+        int $requestTime,
+        string $requestIP,
+        string $hash
+    ) {
+        $this->code = $code;
+        $this->email = $email;
+        $this->requestTime = $requestTime;
+        $this->requestIP = $requestIP;
+        $this->hash = $hash;
+    }
+
+    /**
      * @return string
      */
     public function getCode(): string
@@ -45,14 +66,6 @@ class EmailModel extends Model
     public function getEmail(): string
     {
         return $this->email;
-    }
-
-    /**
-     * @param string $email
-     */
-    public function setEmail(string $email): void
-    {
-        $this->email = $email;
     }
 
     /**
@@ -80,26 +93,10 @@ class EmailModel extends Model
     }
 
     /**
-     * @param string $requestIP
-     */
-    public function setRequestIP(string $requestIP): void
-    {
-        $this->requestIP = $requestIP;
-    }
-
-    /**
      * @return string
      */
     public function getHash(): string
     {
         return $this->hash;
-    }
-
-    /**
-     * @param string $hash
-     */
-    public function setHash(string $hash): void
-    {
-        $this->hash = $hash;
     }
 }

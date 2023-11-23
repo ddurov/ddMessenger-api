@@ -42,15 +42,13 @@ class UserService
         if ($this->entityRepository->findOneBy(["username" => $username]) !== null)
             throw new EntityException("current entity 'account by username' are exists", 422);
 
-        $passwordSalt = bin2hex(openssl_random_pseudo_bytes(16));
-
-        $newUser = new UserModel();
-        $newUser->setLogin($login);
-        $newUser->setPassword($password, $passwordSalt);
-        $newUser->setPasswordSalt($passwordSalt);
-        $newUser->setEmail($email);
-        $newUser->setUsername($username);
-        $newUser->setIsAdmin(0);
+        $newUser = new UserModel(
+            $login,
+            $password,
+            bin2hex(openssl_random_pseudo_bytes(16)),
+            $email,
+            $username
+        );
 
         $this->entityManager->persist($newUser);
         $this->entityManager->flush();

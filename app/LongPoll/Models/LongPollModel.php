@@ -12,48 +12,38 @@ use Doctrine\ORM\Mapping\Table;
 #[Table(name: "longpoll")]
 class LongPollModel extends Model
 {
-    #[Column(type: Types::INTEGER)]
-    private int $aId;
-    #[Column(type: Types::BOOLEAN)]
-    private bool $checked;
+    #[Column(type: Types::STRING)]
+    private string $aIds;
     #[Column(type: Types::JSON)]
     private array $data;
 
-    public function __construct()
-    {
-        $this->checked = false;
+    /**
+     * @param array $aIds
+     * @param array $data
+     */
+    public function __construct(
+        array $aIds,
+        array $data
+    ) {
+        $this->aIds = "|".implode("|", $aIds)."|";;
+        $this->data = $data;
     }
 
     /**
-     * @return int
+     * @return array
      */
-    public function getAId(): int
+    public function getAIds(): array
     {
-        return $this->aId;
+        preg_match_all("|\d+|", $this->aIds, $matches);
+        return $matches[0];
     }
 
     /**
-     * @param int $aId
+     * @param array $aIds
      */
-    public function setAId(int $aId): void
+    public function setAIds(array $aIds): void
     {
-        $this->aId = $aId;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isChecked(): bool
-    {
-        return $this->checked;
-    }
-
-    /**
-     * @param bool $checked
-     */
-    public function setChecked(bool $checked): void
-    {
-        $this->checked = $checked;
+        $this->aIds = "|".implode("|", $aIds)."|";
     }
 
     /**
@@ -62,13 +52,5 @@ class LongPollModel extends Model
     public function getData(): array
     {
         return $this->data;
-    }
-
-    /**
-     * @param array $data
-     */
-    public function setData(array $data): void
-    {
-        $this->data = $data;
     }
 }

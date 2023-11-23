@@ -26,19 +26,35 @@ class UserModel extends Model
     private int $isAdmin;
 
     /**
+     * @param string $login
+     * @param string $password
+     * @param string $passwordSalt
+     * @param string $email
+     * @param string $username
+     * @param int $isAdmin
+     */
+    public function __construct(
+        string $login,
+        string $password,
+        string $passwordSalt,
+        string $email,
+        string $username,
+        int $isAdmin = 0
+    ) {
+        $this->login = $login;
+        $this->password = md5($password . $passwordSalt);
+        $this->passwordSalt = $passwordSalt;
+        $this->email = $email;
+        $this->username = $username;
+        $this->isAdmin = $isAdmin;
+    }
+
+    /**
      * @return string
      */
     public function getLogin(): string
     {
         return $this->login;
-    }
-
-    /**
-     * @param string $login
-     */
-    public function setLogin(string $login): void
-    {
-        $this->login = $login;
     }
 
     /**

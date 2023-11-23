@@ -30,18 +30,13 @@ class TokenService
      */
     public function create(int $tokenType, string $sessionId): string
     {
-        $token = bin2hex(openssl_random_pseudo_bytes(48));
-
-        $newToken = new TokenModel();
-        $newToken->setAId(
+        $this->entityManager->persist(new TokenModel(
             $this->entityManager->getRepository(SessionModel::class)->findOneBy(
                 ["sessionId" => $sessionId]
-            )->getAId()
-        );
-        $newToken->setToken($token);
-        $newToken->setTokenType($tokenType);
-
-        $this->entityManager->persist($newToken);
+            )->getAId(),
+            $token = bin2hex(openssl_random_pseudo_bytes(48)),
+            $tokenType
+        ));
         $this->entityManager->flush();
 
         return $token;

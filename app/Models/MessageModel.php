@@ -13,17 +13,49 @@ use Doctrine\ORM\Mapping\Table;
 class MessageModel extends Model
 {
     #[Column(type: Types::INTEGER)]
-    private int $dialogId;
+    private int $localMessageId;
     #[Column(type: Types::INTEGER)]
-    private int $senderAId;
+    private int $dialogId;
     #[Column(type: Types::INTEGER)]
     private int $peerAId;
     #[Column(type: Types::INTEGER)]
-    private int $messageId;
+    private int $senderAId;
     #[Column(type: Types::TEXT)]
-    private string $messageText;
+    private string $text;
     #[Column(type: Types::INTEGER)]
-    private int $messageDate;
+    private int $time;
+
+    /**
+     * @param int $localMessageId
+     * @param int $dialogId
+     * @param int $peerAId
+     * @param int $senderAId
+     * @param string $text
+     * @param int $time
+     */
+    public function __construct(
+        int $localMessageId,
+        int $dialogId,
+        int $peerAId,
+        int $senderAId,
+        string $text,
+        int $time
+    ) {
+        $this->localMessageId = $localMessageId;
+        $this->dialogId = $dialogId;
+        $this->peerAId = $peerAId;
+        $this->senderAId = $senderAId;
+        $this->text = $text;
+        $this->time = $time;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLocalMessageId(): int
+    {
+        return $this->localMessageId;
+    }
 
     /**
      * @return int
@@ -31,30 +63,6 @@ class MessageModel extends Model
     public function getDialogId(): int
     {
         return $this->dialogId;
-    }
-
-    /**
-     * @param int $dialogId
-     */
-    public function setDialogId(int $dialogId): void
-    {
-        $this->dialogId = $dialogId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSenderAId(): int
-    {
-        return $this->senderAId;
-    }
-
-    /**
-     * @param int $senderAId
-     */
-    public function setSenderAId(int $senderAId): void
-    {
-        $this->senderAId = $senderAId;
     }
 
     /**
@@ -66,58 +74,26 @@ class MessageModel extends Model
     }
 
     /**
-     * @param int $peerAId
-     */
-    public function setPeerAId(int $peerAId): void
-    {
-        $this->peerAId = $peerAId;
-    }
-
-    /**
      * @return int
      */
-    public function getMessageId(): int
+    public function getSenderAId(): int
     {
-        return $this->messageId;
-    }
-
-    /**
-     * @param int $messageId
-     */
-    public function setMessageId(int $messageId): void
-    {
-        $this->messageId = $messageId;
+        return $this->senderAId;
     }
 
     /**
      * @return string
      */
-    public function getMessageText(): string
+    public function getText(): string
     {
-        return $this->messageText;
-    }
-
-    /**
-     * @param string $messageText
-     */
-    public function setMessageText(string $messageText): void
-    {
-        $this->messageText = $messageText;
+        return $this->text;
     }
 
     /**
      * @return int
      */
-    public function getMessageDate(): int
+    public function getTime(): int
     {
-        return $this->messageDate;
-    }
-
-    /**
-     * @param int $messageDate
-     */
-    public function setMessageDate(int $messageDate): void
-    {
-        $this->messageDate = $messageDate;
+        return $this->time;
     }
 }

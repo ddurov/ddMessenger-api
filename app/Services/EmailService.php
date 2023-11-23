@@ -46,24 +46,24 @@ class EmailService
 
             $emailCodeDetails->setCode($code);
             $emailCodeDetails->setRequestTime(time());
-            $emailCodeDetails->setHash($hash);
         } else {
-            $newEmailCode = new EmailModel();
-            $newEmailCode->setCode($code);
-            $newEmailCode->setEmail($email);
-            $newEmailCode->setRequestTime(time());
-            $newEmailCode->setRequestIP($_SERVER['REMOTE_ADDR']);
-            $newEmailCode->setHash($hash);
-
-            $this->entityManager->persist($newEmailCode);
+            $this->entityManager->persist(new EmailModel(
+                $code,
+                $email,
+                time(),
+                $_SERVER['REMOTE_ADDR'],
+                $hash
+            ));
         }
 
         $this->mailer->addAddress($email);
         $this->mailer->isHTML();
         $this->mailer->Subject = "Код подтверждения";
-        $this->mailer->Body = "Код подтверждения: <b>$code</b><br>
-                               Данный код будет активен в течение часа с момента получения письма<br>
-                               <b>Если Вы не запрашивали данное письмо — немедленно смените пароль</b>";
+        $this->mailer->Body =
+            "Код подтверждения: $code\n" .
+            "Данный код будет активен в течение часа с момента получения письма\n" .
+            "Если Вы не запрашивали данное письмо — немедленно смените пароль";
+        $this->mailer->isHTML(false);
         if (!$this->mailer->send()) {
             Other::log($this->mailer->ErrorInfo);
             throw new InternalError("mail hasn't been sent, internal error");

@@ -47,53 +47,51 @@ class MessageService
 
         $time = time();
 
-        $messageId = ($dialog !== null) ? $dialog->getLastMessageId() + 1 : 1;
-
-        $newMessage = new MessageModel();
-        $newMessage->setSenderAId($me["aId"]);
-        $newMessage->setPeerAId($aId);
-        $newMessage->setMessageId($messageId);
-        $newMessage->setMessageText(self::encryptMessage($text));
-        $newMessage->setMessageDate($time);
+        $localMessageId = ($dialog !== null) ? $dialog->getLocalMessageId() + 1 : 1;
 
         if ($dialog !== null) {
-            $dialog->setLastMessageSenderAId($me["aId"]);
-            $dialog->setLastMessageId($messageId);
-            $dialog->setLastMessageText(self::encryptMessage($text));
-            $dialog->setLastMessageDate($time);
-            $newMessage->setDialogId($dialog->getId());
+            $dialog->setSenderAId($me["aId"]);
+            $dialog->setLocalMessageId($localMessageId);
+            $dialog->setText(self::encryptMessage($text));
+            $dialog->setDate($time);
         } else {
-            $newDialog = new DialogModel();
-            $newDialog->setFirstId($me["aId"]);
-            $newDialog->setSecondId($aId);
-            $newDialog->setLastMessageSenderAId($me["aId"]);
-            $newDialog->setLastMessageId($messageId);
-            $newDialog->setLastMessageText(self::encryptMessage($text));
-            $newDialog->setLastMessageDate($time);
-            $this->entityManager->persist($newDialog);
-            $this->entityManager->flush();
-            $newMessage->setDialogId($newDialog->getId());
+            $dialog = new DialogModel(
+                $localMessageId,
+                $me["aId"],
+                $aId,
+                $me["aId"],
+                $text,
+                $time
+            );
         }
 
-        $this->entityManager->persist($newMessage);
+        $this->entityManager->persist($dialog);
         $this->entityManager->flush();
 
-        $newEvent = new LongPollModel();
-        $newEvent->setAId($aId);
-        $newEvent->setData([
-            "type" => "newMessage",
-            "data" => [
-                "id" => $messageId,
-                "senderAId" => $me["aId"],
-                "peerAId" => $aId,
-                "message" => self::encryptMessage($text),
-                "messageDate" => $time
+        $this->entityManager->persist(new MessageModel(
+            $localMessageId,
+            $dialog->getId(),
+            $aId,
+            $me["aId"],
+            self::encryptMessage($text),
+            $time
+        ));
+        $this->entityManager->persist(new LongPollModel(
+            [$aId, $me["aId"]],
+            [
+                "type" => "newMessage",
+                "data" => [
+                    "id" => $localMessageId,
+                    "peerAId" => $aId,
+                    "senderAId" => $me["aId"],
+                    "text" => self::encryptMessage($text),
+                    "time" => $time
+                ]
             ]
-        ]);
-        $this->entityManager->persist($newEvent);
+        ));
         $this->entityManager->flush();
 
-        return $messageId;
+        return $localMessageId;
     }
 
     /**
@@ -129,11 +127,11 @@ class MessageService
 
         foreach ($messages as $message) {
             $preparedData[] = [
-                "id" => $message->getMessageId(),
-                "senderAId" => $message->getSenderAId(),
+                "id" => $message->getLocalMessageId(),
                 "peerAId" => $message->getPeerAId(),
-                "message" => self::decryptMessage($message->getMessageText()),
-                "messageDate" => $message->getMessageDate()
+                "senderAId" => $message->getSenderAId(),
+                "text" => self::decryptMessage($message->getText()),
+                "time" => $message->getTime()
             ];
         }
 
@@ -163,10 +161,10 @@ class MessageService
 
             $preparedData[] = [
                 "peerAId" => $peerAId,
-                "lastMessageSenderAId" => $dialog->getLastMessageSenderAId(),
-                "lastMessageId" => $dialog->getLastMessageId(),
-                "lastMessage" => self::decryptMessage($dialog->getLastMessageText()),
-                "lastMessageDate" => $dialog->getLastMessageDate()
+                "senderAId" => $dialog->getSenderAId(),
+                "messageId" => $dialog->getLocalMessageId(),
+                "text" => self::decryptMessage($dialog->getText()),
+                "time" => $dialog->getDate()
             ];
         }
 
@@ -205,14 +203,12 @@ class MessageService
     {
         $fullRawDecrypted = base64_decode($messageEncoded);
         $ivLength = openssl_cipher_iv_length($cipher = 'aes-256-ctr');
-        $iv = substr($fullRawDecrypted, 0, $ivLength);
-        $rawDecrypted = substr($fullRawDecrypted, $ivLength + 32);
         return openssl_decrypt(
-            $rawDecrypted,
+            substr($fullRawDecrypted, $ivLength + 32),
             $cipher,
             getenv("MESSAGES_ENCRYPTION_KEY"),
             OPENSSL_RAW_DATA,
-            $iv
+            substr($fullRawDecrypted, 0, $ivLength)
         );
     }
 }

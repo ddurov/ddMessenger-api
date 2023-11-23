@@ -45,7 +45,7 @@ class MessageController extends Controller
         (new SuccessResponse())->setBody(
             $this->messageService->send(
                 parent::$inputData["data"]["aId"],
-                parent::$inputData["data"]["text"],
+                strval(parent::$inputData["data"]["text"]),
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
         )->send();

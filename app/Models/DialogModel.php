@@ -13,17 +13,57 @@ use Doctrine\ORM\Mapping\Table;
 class DialogModel extends Model
 {
     #[Column(type: Types::INTEGER)]
+    private int $localMessageId;
+    #[Column(type: Types::INTEGER)]
     private int $firstId;
     #[Column(type: Types::INTEGER)]
     private int $secondId;
     #[Column(type: Types::INTEGER)]
-    private int $lastMessageId;
-    #[Column(type: Types::INTEGER)]
-    private int $lastMessageSenderAId;
+    private int $senderAId;
     #[Column(type: Types::TEXT)]
-    private string $lastMessageText;
+    private string $text;
     #[Column(type: Types::INTEGER)]
-    private int $lastMessageDate;
+    private int $date;
+
+    /**
+     * @param int $localMessageId
+     * @param int $firstId
+     * @param int $secondId
+     * @param int $senderAId
+     * @param string $text
+     * @param int $date
+     */
+    public function __construct(
+        int $localMessageId,
+        int $firstId,
+        int $secondId,
+        int $senderAId,
+        string $text,
+        int $date
+    ) {
+        $this->localMessageId = $localMessageId;
+        $this->firstId = $firstId;
+        $this->secondId = $secondId;
+        $this->senderAId = $senderAId;
+        $this->text = $text;
+        $this->date = $date;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLocalMessageId(): int
+    {
+        return $this->localMessageId;
+    }
+
+    /**
+     * @param int $localMessageId
+     */
+    public function setLocalMessageId(int $localMessageId): void
+    {
+        $this->localMessageId = $localMessageId;
+    }
 
     /**
      * @return int
@@ -31,14 +71,6 @@ class DialogModel extends Model
     public function getFirstId(): int
     {
         return $this->firstId;
-    }
-
-    /**
-     * @param int $firstId
-     */
-    public function setFirstId(int $firstId): void
-    {
-        $this->firstId = $firstId;
     }
 
     /**
@@ -50,74 +82,50 @@ class DialogModel extends Model
     }
 
     /**
-     * @param int $secondId
-     */
-    public function setSecondId(int $secondId): void
-    {
-        $this->secondId = $secondId;
-    }
-
-    /**
      * @return int
      */
-    public function getLastMessageId(): int
+    public function getSenderAId(): int
     {
-        return $this->lastMessageId;
+        return $this->senderAId;
     }
 
     /**
-     * @param int $lastMessageId
+     * @param int $senderAId
      */
-    public function setLastMessageId(int $lastMessageId): void
+    public function setSenderAId(int $senderAId): void
     {
-        $this->lastMessageId = $lastMessageId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLastMessageSenderAId(): int
-    {
-        return $this->lastMessageSenderAId;
-    }
-
-    /**
-     * @param int $lastMessageSenderAId
-     */
-    public function setLastMessageSenderAId(int $lastMessageSenderAId): void
-    {
-        $this->lastMessageSenderAId = $lastMessageSenderAId;
+        $this->senderAId = $senderAId;
     }
 
     /**
      * @return string
      */
-    public function getLastMessageText(): string
+    public function getText(): string
     {
-        return $this->lastMessageText;
+        return $this->text;
     }
 
     /**
-     * @param string $lastMessageText
+     * @param string $text
      */
-    public function setLastMessageText(string $lastMessageText): void
+    public function setText(string $text): void
     {
-        $this->lastMessageText = $lastMessageText;
+        $this->text = $text;
     }
 
     /**
      * @return int
      */
-    public function getLastMessageDate(): int
+    public function getDate(): int
     {
-        return $this->lastMessageDate;
+        return $this->date;
     }
 
     /**
-     * @param int $lastMessageDate
+     * @param int $date
      */
-    public function setLastMessageDate(int $lastMessageDate): void
+    public function setDate(int $date): void
     {
-        $this->lastMessageDate = $lastMessageDate;
+        $this->date = $date;
     }
 }

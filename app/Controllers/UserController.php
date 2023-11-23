@@ -39,7 +39,13 @@ class UserController extends Controller
 
     /**
      * @return void
-     * @throws ORMException|ParametersException|EntityException
+     * @throws EntityException
+     * @throws InternalError
+     * @throws MissingMappingDriverImplementation
+     * @throws NotSupported
+     * @throws ORMException
+     * @throws ParametersException
+     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function register(): void
     {
@@ -47,9 +53,7 @@ class UserController extends Controller
             "login" => "required|between:6,64",
             "password" => "required|min:8",
             "username" => "required|min:4",
-            "email" => "required|regex:/(.*)@([\w\-\.]+)\.([\w]+)/",
-            "emailCode" => "required",
-            "hash" => "required"
+            "email" => "required|regex:/(.*)@([\w\-\.]+)\.([\w]+)/"
         ]);
 
         if (preg_match("#[^a-zA-Z0-9@$!%*?&+~|{}:;<>/.]+#", parent::$inputData["data"]["login"]))
@@ -58,8 +62,22 @@ class UserController extends Controller
         if (preg_match("#[^a-zA-Z0-9@$!%*?&+~|{}:;<>/.]+#", parent::$inputData["data"]["password"]))
             throw new ParametersException("password has incorrect symbols");
 
+        if (!isset(parent::$inputData["data"]["emailCode"]))
+            (new SuccessResponse())->setBody(
+                $this->emailService->createCode(
+                    parent::$inputData["data"]["email"]
+                )
+            )->setCode(202)->send();
+
+        parent::validateData(parent::$inputData["data"], [
+            "emailCode" => "required",
+            "hash" => "required"
+        ]);
+
         $this->emailService->confirmCode(
-            parent::$inputData["data"]["emailCode"], parent::$inputData["data"]["hash"], 1
+            parent::$inputData["data"]["emailCode"],
+            parent::$inputData["data"]["hash"],
+            1
         );
 
         (new SuccessResponse())->setBody(

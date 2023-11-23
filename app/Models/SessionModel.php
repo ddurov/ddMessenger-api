@@ -24,19 +24,32 @@ class SessionModel extends Model
     private string $authIP;
 
     /**
+     * @param string $sessionId
+     * @param int $aId
+     * @param int $authTime
+     * @param int $authDevice
+     * @param string $authIP
+     */
+    public function __construct(
+        string $sessionId,
+        int $aId,
+        int $authTime,
+        int $authDevice,
+        string $authIP
+    ) {
+        $this->sessionId = $sessionId;
+        $this->aId = $aId;
+        $this->authTime = $authTime;
+        $this->authDevice = $authDevice;
+        $this->authIP = $authIP;
+    }
+
+    /**
      * @return string
      */
     public function getSessionId(): string
     {
         return $this->sessionId;
-    }
-
-    /**
-     * @param string $sessionId
-     */
-    public function setSessionId(string $sessionId): void
-    {
-        $this->sessionId = $sessionId;
     }
 
     /**
@@ -48,14 +61,6 @@ class SessionModel extends Model
     }
 
     /**
-     * @param int $aId
-     */
-    public function setAId(int $aId): void
-    {
-        $this->aId = $aId;
-    }
-
-    /**
      * @return int
      */
     public function getAuthTime(): int
@@ -64,27 +69,11 @@ class SessionModel extends Model
     }
 
     /**
-     * @param int $authTime
-     */
-    public function setAuthTime(int $authTime): void
-    {
-        $this->authTime = $authTime;
-    }
-
-    /**
      * @return int
      */
     public function getAuthDevice(): int
     {
         return $this->authDevice;
-    }
-
-    /**
-     * @param int $authDevice
-     */
-    public function setAuthDevice(int $authDevice): void
-    {
-        $this->authDevice = $authDevice;
     }
 
     /**

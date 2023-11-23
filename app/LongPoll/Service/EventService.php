@@ -43,7 +43,11 @@ class EventService
 
         for ($i = 0; $i < $timeout; $i++) {
             /** @var LongPollModel[] $events */
-            $events = $this->entityRepository->findBy(["aId" => $me, "checked" => false]);
+            $events = $this->entityRepository->createQueryBuilder("e")
+                ->where("e.aIds LIKE :exp")
+                ->setParameter("exp", "%|$me|%")
+                ->getQuery()
+                ->getResult();
 
             if ($events === []) {
                 sleep(1);
@@ -53,13 +57,12 @@ class EventService
             $preparedData = [];
 
             foreach ($events as $event) {
-                $event->setChecked(true);
-
+                $event->setAIds(array_diff($event->getAIds(), [$me]));
                 switch ($event->getData()["type"]) {
                     case "newMessage":
                         $preparedData[] = $this->changeValue(
-                            "message",
-                            MessageService::decryptMessage($event->getData()["data"]["message"]),
+                            "text",
+                            MessageService::decryptMessage($event->getData()["data"]["text"]),
                             $event->getData()
                         );
                         break;
