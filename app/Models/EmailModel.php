@@ -99,4 +99,12 @@ class EmailModel extends Model
     {
         return $this->hash;
     }
+
+    /**
+     * @param string $hash
+     */
+    public function setHash(string $hash): void
+    {
+        $this->hash = $hash;
+    }
 }

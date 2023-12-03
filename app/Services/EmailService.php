@@ -46,6 +46,7 @@ class EmailService
 
             $emailCodeDetails->setCode($code);
             $emailCodeDetails->setRequestTime(time());
+            $emailCodeDetails->setHash($hash);
         } else {
             $this->entityManager->persist(new EmailModel(
                 $code,
@@ -64,6 +65,7 @@ class EmailService
             "Данный код будет активен в течение часа с момента получения письма\n" .
             "Если Вы не запрашивали данное письмо — немедленно смените пароль";
         $this->mailer->isHTML(false);
+
         if (!$this->mailer->send()) {
             Other::log($this->mailer->ErrorInfo);
             throw new InternalError("mail hasn't been sent, internal error");
