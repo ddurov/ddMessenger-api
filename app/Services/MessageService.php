@@ -60,7 +60,7 @@ class MessageService
                 $me["aId"],
                 $aId,
                 $me["aId"],
-                $text,
+                self::encryptMessage($text),
                 $time
             );
         }
