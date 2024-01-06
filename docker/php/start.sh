@@ -1,3 +1,4 @@
+rm /tmp/ddLogs/*.log
 php app/cli.php orm:schema-tool:update --force
 if [ $? -ne 0 ]; then
     echo "Database are not configured"
