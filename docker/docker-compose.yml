@@ -1,16 +1,16 @@
 version: '3'
 services:
   app:
-    build: ./php
+    build: php
     ports:
       - "${WEB_PORT}:${WEB_PORT}"
     env_file:
-      - ./../.env
+      - ../.env
     volumes:
-      - ./logs/:/tmp/ddLogs/
-      - ./../app/:/var/www/app/
-      - ./../web/:/var/www/web/
-      - ./../vendor/:/var/www/vendor/
+      - ../docker/logs/:/tmp/ddLogs/
+      - ../app/:/var/www/app/
+      - ../web/:/var/www/web/
+      - ../vendor/:/var/www/vendor/
     # UNCOMMENT ONLY FOR LOCAL DEVELOPMENT
     #links:
     #  - db
