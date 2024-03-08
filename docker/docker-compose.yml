@@ -2,33 +2,71 @@ version: "3.8"
 services:
   app:
     build: php
-    ports:
-      - "${WEB_PORT}:${WEB_PORT}"
     env_file:
       - ../.env
     volumes:
-      - ../docker/logs/:/tmp/ddLogs/
       - ../app/:/var/www/app/
-      - ../web/:/var/www/web/
+      - ../web/:/var/www/html/
       - ../vendor/:/var/www/vendor/
-    # UNCOMMENT ONLY FOR LOCAL DEVELOPMENT
-    #links:
-    #  - db
+    links:
+      - db
     deploy:
       restart_policy:
         condition: on-failure
         delay: 1s
         max_attempts: 10
-  # UNCOMMENT ONLY FOR LOCAL DEVELOPMENT
-  #db:
-  #  image: mysql:latest
-  #  command: -P ${DATABASE_PORT}
-  #  environment:
-  #    MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
-  #    MYSQL_DATABASE: ${DATABASE_NAME}
-  #    MYSQL_USER: ${DATABASE_USER}
-  #    MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-  #  ports:
-  #    - "${DATABASE_PORT}:${DATABASE_PORT}"
-  #  volumes:
-  #    - ./database/data/:/var/lib/mysql
+  db:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ../docker/database/:/docker-entrypoint-initdb.d/:ro
+  db-admin:
+    image: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    links:
+      - db
+    depends_on:
+      - db
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - ${WEB_PROXY_ADMIN_PORT}:81
+    volumes:
+      - proxy-data:/data
+      - proxy-letsencrypt:/etc/letsencrypt
+  mail:
+    image: analogic/poste.io:latest
+    restart: unless-stopped
+    hostname: ${MAIL_SERVER}
+    ports:
+      - "25:25"
+      - "110:110"
+      - "143:143"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+      - "995:995"
+    environment:
+      - HTTPS=OFF
+      - DISABLE_CLAMAV=TRUE
+      - DISABLE_RSPAMD=TRUE
+    volumes:
+      - mail-data:/data
+      - /etc/localtime:/etc/localtime:ro
+volumes:
+  db-data:
+  mail-data:
+  proxy-data:
+  proxy-letsencrypt:

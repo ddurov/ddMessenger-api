@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Api\Singletone;
+namespace Api\Singleton;
 
-use Api\Contracts\Singleton;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\MissingMappingDriverImplementation;

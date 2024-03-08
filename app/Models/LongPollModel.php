@@ -1,6 +1,6 @@
 <?php
 
-namespace Api\LongPoll\Models;
+namespace Api\Models;
 
 use Core\Models\Model;
 use Doctrine\DBAL\Types\Types;
@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 
 #[Entity]
-#[Table(name: "longpoll")]
+#[Table(name: "long_poll")]
 class LongPollModel extends Model
 {
     #[Column(type: Types::STRING)]

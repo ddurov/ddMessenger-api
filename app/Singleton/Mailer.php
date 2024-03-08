@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Api\Singletone;
+namespace Api\Singleton;
 
-use Api\Contracts\Singleton;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 

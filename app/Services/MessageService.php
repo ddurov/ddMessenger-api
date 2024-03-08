@@ -2,14 +2,17 @@
 
 namespace Api\Services;
 
-use Api\LongPoll\Models\LongPollModel;
 use Api\Models\DialogModel;
+use Api\Models\LongPollModel;
 use Api\Models\MessageModel;
+use Api\Models\TokenModel;
 use Core\Exceptions\EntityException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\Parameter;
 
 class MessageService
@@ -169,6 +172,70 @@ class MessageService
         }
 
         return $preparedData;
+    }
+
+    /**
+     * Прослушивание новых событий
+     * @param int $timeout
+     * @param string $token
+     * @return array
+     * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getUpdates(int $timeout, string $token): array
+    {
+        $me = $this->entityManager->getRepository(TokenModel::class)->findOneBy(
+            ["token" => $token]
+        )->getAId();
+
+        for ($i = 0; $i < $timeout; $i++) {
+            /** @var LongPollModel[] $events */
+            $events = $this->entityManager->getRepository(LongPollModel::class)->createQueryBuilder("e")
+                ->where("e.aIds LIKE :exp")
+                ->setParameter("exp", "%|$me|%")
+                ->getQuery()
+                ->getResult();
+
+            if ($events === []) {
+                sleep(1);
+                continue;
+            }
+
+            $preparedData = [];
+
+            foreach ($events as $event) {
+                $event->setAIds(array_diff($event->getAIds(), [$me]));
+                switch ($event->getData()["type"]) {
+                    case "newMessage":
+                        $preparedData[] = $this->changeValue(
+                            "text",
+                            MessageService::decryptMessage($event->getData()["data"]["text"]),
+                            $event->getData()
+                        );
+                        break;
+                    default:
+                        $preparedData[] = $event->getData();
+                        break;
+                }
+
+                $this->entityManager->flush();
+            }
+
+            return $preparedData;
+        }
+        return [];
+    }
+
+    private function changeValue($findKey, $newValue, $array): array
+    {
+        $newArray = [];
+        foreach ($array as $key => $value) {
+            $newArray[$key] = $value;
+            if ($findKey === $key) $newArray[$key] = $newValue;
+            if (is_array($value)) $newArray[$key] = $this->changeValue($findKey, $newValue, $value);
+        }
+        return $newArray;
     }
 
     /**

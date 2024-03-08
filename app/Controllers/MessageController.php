@@ -4,13 +4,15 @@ namespace Api\Controllers;
 
 use Api\Services\MessageService;
 use Api\Services\TokenService;
-use Api\Singletone\Database;
+use Api\Singleton\Database;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\ParametersException;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class MessageController extends Controller
 {
@@ -87,6 +89,31 @@ class MessageController extends Controller
 
         (new SuccessResponse())->setBody(
             $this->messageService->getDialogs(
+                parent::$inputData["headers"]["HTTP_TOKEN"]
+            )
+        )->send();
+    }
+
+    /**
+     * @return void
+     * @throws ParametersException
+     * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws EntityException
+     */
+    public function getUpdates(): void
+    {
+        parent::validateData(parent::$inputData["data"] + parent::$inputData["headers"], [
+            "timeout" => "required|numeric",
+            "HTTP_TOKEN" => "required"
+        ]);
+
+        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+
+        (new SuccessResponse())->setBody(
+            $this->messageService->getUpdates(
+                parent::$inputData["data"]["timeout"],
                 parent::$inputData["headers"]["HTTP_TOKEN"]
             )
         )->send();

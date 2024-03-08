@@ -4,7 +4,7 @@ namespace Api\Controllers;
 
 use Api\Services\SessionService;
 use Api\Services\TokenService;
-use Api\Singletone\Database;
+use Api\Singleton\Database;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;

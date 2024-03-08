@@ -2,8 +2,8 @@
 
 namespace Api\Controllers;
 
-use Api\Singletone\Database;
-use Api\Singletone\Mailer;
+use Api\Singleton\Database;
+use Api\Singleton\Mailer;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\InternalError;

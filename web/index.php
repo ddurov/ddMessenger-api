@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require_once "vendor/autoload.php";
+require_once "../vendor/autoload.php";
 
 use Bramus\Router\Router;
 use Core\DTO\ErrorResponse;
@@ -18,7 +18,7 @@ $router->setNamespace("\Api\Controllers");
 try {
 
     $router->get("/", function () {
-        echo "API for ddMessager";
+        echo "API for ddMessenger";
     });
 
     $router->mount("/methods", function () use ($router) {
@@ -99,10 +99,8 @@ try {
 
             $router->get("/getDialogs", "MessageController@getDialogs");
 
-        });
+            $router->get("/getUpdates", "MessageController@getUpdates");
 
-        $router->all("/longpoll(/.*)?", function () {
-            require_once "longpoll/index.php";
         });
 
     });
@@ -123,7 +121,7 @@ try {
         "Error: " . $exceptions->getMessage() .
         " on line: " . $exceptions->getLine() .
         " in: " . $exceptions->getFile(),
-        "messager"
+        "messenger"
     );
     (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 

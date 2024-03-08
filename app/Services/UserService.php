@@ -2,9 +2,8 @@
 
 namespace Api\Services;
 
-use Api\Models\SessionModel;
 use Api\Models\TokenModel;
-use Api\Singletone\Database;
+use Api\Singleton\Database;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\ParametersException;
 use Api\Models\UserModel;

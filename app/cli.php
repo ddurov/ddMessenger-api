@@ -1,10 +1,10 @@
 <?php
 
-ini_set('display_errors', '1');
+ini_set('display_errors', 1);
 
 require_once "vendor/autoload.php";
 
-use Api\Singletone\Database;
+use Api\Singleton\Database;
 use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;

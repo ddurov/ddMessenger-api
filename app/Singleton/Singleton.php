@@ -1,6 +1,6 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Api\Contracts;
+namespace Api\Singleton;
 
 interface Singleton
 {
