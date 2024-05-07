@@ -67,7 +67,7 @@ class EmailService
         $this->mailer->isHTML(false);
 
         if (!$this->mailer->send()) {
-            Other::log($this->mailer->ErrorInfo);
+            Other::log("/var/www/logs", "mail", $this->mailer->ErrorInfo);
             throw new InternalError("mail hasn't been sent, internal error");
         }
 

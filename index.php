@@ -118,10 +118,11 @@ try {
 } catch (Throwable $exceptions) {
 
     Other::log(
+        "/var/www/logs",
+        "project",
         "Error: " . $exceptions->getMessage() .
         " on line: " . $exceptions->getLine() .
-        " in: " . $exceptions->getFile(),
-        "messenger"
+        " in: " . $exceptions->getFile()
     );
     (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 
