@@ -18,7 +18,7 @@ class Database implements Singleton
         if (self::$database === null) {
             self::$database = (new \Core\Database())->create(
                 getenv("DATABASE_NAME"),
-                getenv("DATABASE_USER"),
+                "user",
                 getenv("DATABASE_PASSWORD"),
                 getenv("DATABASE_SERVER"),
                 (int) getenv("DATABASE_PORT"),
