@@ -9,7 +9,6 @@ services:
     depends_on:
       - app
     volumes:
-      - ../index.php:/var/www/index.php:ro
       - ./nginx/project.conf:/etc/nginx/conf.d/project.conf:ro
       - ./nginx/certs/:/etc/nginx/ssl/:ro
   app:

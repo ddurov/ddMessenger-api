@@ -12,49 +12,50 @@ use Doctrine\ORM\Mapping\Table;
 #[Table(name: "tokens")]
 class TokenModel extends Model
 {
-    #[Column(type: Types::INTEGER)]
-    private int $aId;
-    #[Column(type: Types::TEXT)]
-    private string $token;
-    #[Column(type: Types::INTEGER)]
-    private int $tokenType;
+	#[Column(type: Types::INTEGER)]
+	private int $aId;
+	#[Column(type: Types::TEXT)]
+	private string $token;
+	#[Column(type: Types::INTEGER)]
+	private int $tokenType;
 
-    /**
-     * @param int $aId
-     * @param string $token
-     * @param int $tokenType
-     */
-    public function __construct(
-        int $aId,
-        string $token,
-        int $tokenType
-    ) {
-        $this->aId = $aId;
-        $this->token = $token;
-        $this->tokenType = $tokenType;
-    }
+	/**
+	 * @param int $aId
+	 * @param string $token
+	 * @param int $tokenType
+	 */
+	public function __construct(
+		int    $aId,
+		string $token,
+		int    $tokenType
+	)
+	{
+		$this->aId = $aId;
+		$this->token = $token;
+		$this->tokenType = $tokenType;
+	}
 
-    /**
-     * @return int
-     */
-    public function getAId(): int
-    {
-        return $this->aId;
-    }
+	/**
+	 * @return int
+	 */
+	public function getAId(): int
+	{
+		return $this->aId;
+	}
 
-    /**
-     * @return string
-     */
-    public function getToken(): string
-    {
-        return $this->token;
-    }
+	/**
+	 * @return string
+	 */
+	public function getToken(): string
+	{
+		return $this->token;
+	}
 
-    /**
-     * @return int
-     */
-    public function getTokenType(): int
-    {
-        return $this->tokenType;
-    }
+	/**
+	 * @return int
+	 */
+	public function getTokenType(): int
+	{
+		return $this->tokenType;
+	}
 }

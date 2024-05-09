@@ -14,75 +14,75 @@ use Doctrine\ORM\Exception\ORMException;
 
 class SessionController extends Controller
 {
-    private SessionService $sessionService;
-    private TokenService $tokenService;
+	private SessionService $sessionService;
+	private TokenService $tokenService;
 
-    /**
-     * @throws ORMException
-     * @throws Exception
-     */
-    public function __construct()
-    {
-        $this->sessionService = new SessionService(Database::getInstance());
-        $this->tokenService = new TokenService(Database::getInstance());
-        parent::__construct();
-    }
+	/**
+	 * @throws ORMException
+	 * @throws Exception
+	 */
+	public function __construct()
+	{
+		$this->sessionService = new SessionService(Database::getInstance());
+		$this->tokenService = new TokenService(Database::getInstance());
+		parent::__construct();
+	}
 
-    /**
-     * @return void
-     * @throws ORMException|ParametersException|EntityException
-     */
-    public function create(): void
-    {
-        parent::validateData(parent::$inputData["headers"], [
-            "HTTP_TOKEN" => "required"
-        ]);
+	/**
+	 * @return void
+	 * @throws ORMException|ParametersException|EntityException
+	 */
+	public function create(): void
+	{
+		parent::validateData(parent::$inputData["headers"], [
+			"HTTP_TOKEN" => "required"
+		]);
 
-        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+		$this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new SuccessResponse())->setBody(
-            $this->sessionService->create(
-                parent::$inputData["headers"]["HTTP_TOKEN"]
-            )
-        )->send();
-    }
+		(new SuccessResponse())->setBody(
+			$this->sessionService->create(
+				parent::$inputData["headers"]["HTTP_TOKEN"]
+			)
+		)->send();
+	}
 
-    /**
-     * @return void
-     * @throws ORMException|ParametersException|EntityException
-     */
-    public function get(): void
-    {
-        parent::validateData(parent::$inputData["headers"], [
-            "HTTP_TOKEN" => "required"
-        ]);
+	/**
+	 * @return void
+	 * @throws ORMException|ParametersException|EntityException
+	 */
+	public function get(): void
+	{
+		parent::validateData(parent::$inputData["headers"], [
+			"HTTP_TOKEN" => "required"
+		]);
 
-        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+		$this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new SuccessResponse())->setBody(
-            $this->sessionService->get(
-                parent::$inputData["headers"]["HTTP_TOKEN"]
-            )
-        )->send();
-    }
+		(new SuccessResponse())->setBody(
+			$this->sessionService->get(
+				parent::$inputData["headers"]["HTTP_TOKEN"]
+			)
+		)->send();
+	}
 
-    /**
-     * @return void
-     * @throws ParametersException|EntityException
-     */
-    public function check(): void
-    {
-        parent::validateData(parent::$inputData["headers"], [
-            "HTTP_TOKEN" => "required",
-            "HTTP_SESSION_ID" => "required"
-        ]);
+	/**
+	 * @return void
+	 * @throws ParametersException|EntityException
+	 */
+	public function check(): void
+	{
+		parent::validateData(parent::$inputData["headers"], [
+			"HTTP_TOKEN" => "required",
+			"HTTP_SESSION_ID" => "required"
+		]);
 
-        $this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
+		$this->tokenService->check(parent::$inputData["headers"]["HTTP_TOKEN"]);
 
-        (new SuccessResponse())->setBody(
-            $this->sessionService->check(
-                parent::$inputData["headers"]["HTTP_SESSION_ID"]
-            )
-        )->send();
-    }
+		(new SuccessResponse())->setBody(
+			$this->sessionService->check(
+				parent::$inputData["headers"]["HTTP_SESSION_ID"]
+			)
+		)->send();
+	}
 }

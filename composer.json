@@ -1,25 +1,25 @@
 {
-	"name": "ddprojects/messenger-api",
-	"autoload": {
-		"psr-4": {
-			"Api\\": "src/"
-		}
-	},
-	"authors": [
-		{
-			"name": "ddurov",
-			"email": "admin@ddproj.ru"
-		}
-	],
-	"repositories": [
-		{
-			"type": "vcs",
-			"url": "https://github.com/ddurov/ddProjects-core",
-			"no-api": true
-		}
-	],
-	"require": {
-		"ddprojects/core": "dev-main",
-		"ext-openssl": "*"
+  "name": "ddprojects/messenger-api",
+  "autoload": {
+	"psr-4": {
+	  "Api\\": "src/"
 	}
+  },
+  "authors": [
+	{
+	  "name": "ddurov",
+	  "email": "admin@ddproj.ru"
+	}
+  ],
+  "repositories": [
+	{
+	  "type": "vcs",
+	  "url": "https://github.com/ddurov/ddProjects-core",
+	  "no-api": true
+	}
+  ],
+  "require": {
+	"ddprojects/core": "dev-main",
+	"ext-openssl": "*"
+  }
 }

@@ -4,8 +4,8 @@ namespace Api\Singleton;
 
 interface Singleton
 {
-    /**
-     * @return mixed
-     */
-    public static function getInstance(): mixed;
+	/**
+	 * @return mixed
+	 */
+	public static function getInstance(): mixed;
 }

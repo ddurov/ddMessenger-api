@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require_once "../vendor/autoload.php";
+require_once "vendor/autoload.php";
 
 use Bramus\Router\Router;
 use Core\DTO\ErrorResponse;
@@ -17,113 +17,113 @@ $router->setNamespace("\Api\Controllers");
 
 try {
 
-    $router->get("/", function () {
-        echo "API for ddMessenger";
-    });
+	$router->get("/", function () {
+		echo "API for ddMessenger";
+	});
 
-    $router->mount("/methods", function () use ($router) {
+	$router->mount("/methods", function () use ($router) {
 
-        $router->get("/", function () {
-            throw new ParametersException("method not passed");
-        });
+		$router->get("/", function () {
+			throw new ParametersException("method not passed");
+		});
 
-        $router->mount("/email", function () use ($router) {
+		$router->mount("/email", function () use ($router) {
 
-            $router->get("/", function () {
-                throw new ParametersException("function not passed");
-            });
+			$router->get("/", function () {
+				throw new ParametersException("function not passed");
+			});
 
-            $router->post("/createCode", "EmailController@createCode");
+			$router->post("/createCode", "EmailController@createCode");
 
-            $router->get("/confirmCode", "EmailController@confirmCode");
+			$router->get("/confirmCode", "EmailController@confirmCode");
 
-        });
+		});
 
-        $router->mount("/token", function () use ($router) {
+		$router->mount("/token", function () use ($router) {
 
-            $router->get("/", function () {
-                throw new ParametersException("function not passed");
-            });
+			$router->get("/", function () {
+				throw new ParametersException("function not passed");
+			});
 
-            $router->post("/create", "TokenController@create");
+			$router->post("/create", "TokenController@create");
 
-            $router->get("/get", "TokenController@get");
+			$router->get("/get", "TokenController@get");
 
-            $router->get("/check", "TokenController@check");
+			$router->get("/check", "TokenController@check");
 
-        });
+		});
 
-        $router->mount("/session", function () use ($router) {
+		$router->mount("/session", function () use ($router) {
 
-            $router->get("/", function () {
-                throw new ParametersException("function not passed");
-            });
+			$router->get("/", function () {
+				throw new ParametersException("function not passed");
+			});
 
-            $router->post("/create", "SessionController@create");
+			$router->post("/create", "SessionController@create");
 
-            $router->get("/get", "SessionController@get");
+			$router->get("/get", "SessionController@get");
 
-            $router->get("/check", "SessionController@check");
+			$router->get("/check", "SessionController@check");
 
-        });
+		});
 
-        $router->mount("/user", function () use ($router) {
+		$router->mount("/user", function () use ($router) {
 
-            $router->get("/", function () {
-                throw new ParametersException("function not passed");
-            });
+			$router->get("/", function () {
+				throw new ParametersException("function not passed");
+			});
 
-            $router->post("/register", "UserController@register");
+			$router->post("/register", "UserController@register");
 
-            $router->get("/auth", "UserController@auth");
+			$router->get("/auth", "UserController@auth");
 
-            $router->post("/resetPassword", "UserController@resetPassword");
+			$router->post("/resetPassword", "UserController@resetPassword");
 
-            $router->post("/changeName", "UserController@changeName");
+			$router->post("/changeName", "UserController@changeName");
 
-            $router->get("/get", "UserController@get");
+			$router->get("/get", "UserController@get");
 
-            $router->get("/search", "UserController@search");
+			$router->get("/search", "UserController@search");
 
-        });
+		});
 
-        $router->mount("/messages", function () use ($router) {
+		$router->mount("/messages", function () use ($router) {
 
-            $router->get("/", function () {
-                throw new ParametersException("function not passed");
-            });
+			$router->get("/", function () {
+				throw new ParametersException("function not passed");
+			});
 
-            $router->post("/send", "MessageController@send");
+			$router->post("/send", "MessageController@send");
 
-            $router->get("/getHistory", "MessageController@getHistory");
+			$router->get("/getHistory", "MessageController@getHistory");
 
-            $router->get("/getDialogs", "MessageController@getDialogs");
+			$router->get("/getDialogs", "MessageController@getDialogs");
 
-            $router->get("/getUpdates", "MessageController@getUpdates");
+			$router->get("/getUpdates", "MessageController@getUpdates");
 
-        });
+		});
 
-    });
+	});
 
-    $router->set404(function() {
-        throw new RouterException("current route not found for this request method");
-    });
+	$router->set404(function () {
+		throw new RouterException("current route not found for this request method");
+	});
 
-    $router->run();
+	$router->run();
 
 } catch (CoreExceptions $coreExceptions) {
 
-    (new ErrorResponse())->setCode($coreExceptions->getCode())->setErrorMessage($coreExceptions->getMessage())->send();
+	(new ErrorResponse())->setCode($coreExceptions->getCode())->setErrorMessage($coreExceptions->getMessage())->send();
 
 } catch (Throwable $exceptions) {
 
-    Other::log(
-        "/var/www/logs",
-        "project",
-        "Error: " . $exceptions->getMessage() .
-        " on line: " . $exceptions->getLine() .
-        " in: " . $exceptions->getFile()
-    );
-    (new ErrorResponse())->setErrorMessage("internal error, try later")->send();
+	Other::log(
+		"/var/www/logs",
+		"project",
+		"Error: " . $exceptions->getMessage() .
+		", on line: " . $exceptions->getLine() .
+		", in: " . $exceptions->getFile()
+	);
+	(new ErrorResponse())->setErrorMessage("internal error, try later")->send();
 
 }
