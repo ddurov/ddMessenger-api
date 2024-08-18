@@ -119,7 +119,7 @@ try {
 
 	Other::log(
 		"/var/www/logs",
-		"project",
+		"messenger",
 		"Error: " . $exceptions->getMessage() .
 		", on line: " . $exceptions->getLine() .
 		", in: " . $exceptions->getFile()

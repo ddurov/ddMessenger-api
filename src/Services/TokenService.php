@@ -15,6 +15,10 @@ class TokenService
 	private EntityRepository $entityRepository;
 	private EntityManager $entityManager;
 
+	/**
+	 * @param EntityManager $entityManager
+	 * @throws NotSupported
+	 */
 	public function __construct(EntityManager $entityManager)
 	{
 		$this->entityManager = $entityManager;

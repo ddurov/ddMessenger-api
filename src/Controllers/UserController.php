@@ -25,15 +25,14 @@ class UserController extends Controller
 	private TokenService $tokenService;
 
 	/**
+	 * @throws NotSupported
 	 * @throws \PHPMailer\PHPMailer\Exception
-	 * @throws ORMException
-	 * @throws Exception
 	 */
 	public function __construct()
 	{
-		$this->userService = new UserService(Database::getInstance());
-		$this->emailService = new EmailService(Database::getInstance(), Mailer::getInstance());
-		$this->tokenService = new TokenService(Database::getInstance());
+		$this->userService = new UserService(Database::getEntityManager());
+		$this->emailService = new EmailService(Database::getEntityManager(), Mailer::getInstance());
+		$this->tokenService = new TokenService(Database::getEntityManager());
 		parent::__construct();
 	}
 
@@ -107,7 +106,6 @@ class UserController extends Controller
 	/**
 	 * @return void
 	 * @throws EntityException
-	 * @throws Exception
 	 * @throws ORMException
 	 * @throws ParametersException
 	 * @throws InternalError
@@ -123,7 +121,7 @@ class UserController extends Controller
 		]);
 
 		if (!isset(parent::$inputData["data"]["emailCode"])) {
-			$user = Database::getInstance()->getRepository(UserModel::class)
+			$user = Database::getEntityManager()->getRepository(UserModel::class)
 				->findOneBy(["login" => parent::$inputData["data"]["login"]]);
 
 			if ($user === null)
@@ -131,7 +129,7 @@ class UserController extends Controller
 
 			(new SuccessResponse())->setBody(
 				$this->emailService->createCode(
-					Database::getInstance()->getRepository(UserModel::class)
+					Database::getEntityManager()->getRepository(UserModel::class)
 						->findOneBy(["login" => parent::$inputData["data"]["login"]])
 						->getEmail()
 				)

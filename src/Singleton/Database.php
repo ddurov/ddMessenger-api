@@ -2,29 +2,40 @@
 
 namespace Api\Singleton;
 
+use Core\Singleton;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
 
 class Database implements Singleton
 {
-	private static ?EntityManager $database = null;
+	private static ?\Core\Database $database = null;
 
 	/**
-	 * @throws Exception|MissingMappingDriverImplementation
+	 * @return \Core\Database
+	 * @throws Exception
+	 * @throws MissingMappingDriverImplementation
 	 */
-	public static function getInstance(): EntityManager
+	public static function getInstance(): \Core\Database
 	{
 		if (self::$database === null) {
-			self::$database = (new \Core\Database())->create(
-				getenv("DATABASE_NAME"),
+			self::$database = new \Core\Database(
+				__DIR__ . "/../",
+				"ddProjects-messenger",
 				"user",
 				getenv("DATABASE_PASSWORD"),
 				getenv("DATABASE_SERVER"),
-				(int)getenv("DATABASE_PORT"),
-				__DIR__ . "/../"
+				(int)getenv("DATABASE_PORT")
 			);
 		}
 		return self::$database;
+	}
+
+	/**
+	 * @return EntityManager
+	 */
+	public static function getEntityManager(): EntityManager
+	{
+	    return self::$database->getEntityManager();
 	}
 }

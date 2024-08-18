@@ -8,6 +8,7 @@ use Core\Exceptions\ParametersException;
 use Core\Tools\Other;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -18,6 +19,11 @@ class EmailService
 	private EntityRepository $entityRepository;
 	private PHPMailer $mailer;
 
+	/**
+	 * @param EntityManager $entityManager
+	 * @param PHPMailer $mailer
+	 * @throws NotSupported
+	 */
 	public function __construct(EntityManager $entityManager, PHPMailer $mailer)
 	{
 		$this->mailer = $mailer;

@@ -9,7 +9,6 @@ use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\ParametersException;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -20,13 +19,12 @@ class MessageController extends Controller
 	private TokenService $tokenService;
 
 	/**
-	 * @throws ORMException
-	 * @throws Exception
+	 * @throws NotSupported
 	 */
 	public function __construct()
 	{
-		$this->messageService = new MessageService(Database::getInstance());
-		$this->tokenService = new TokenService(Database::getInstance());
+		$this->messageService = new MessageService(Database::getEntityManager());
+		$this->tokenService = new TokenService(Database::getEntityManager());
 		parent::__construct();
 	}
 

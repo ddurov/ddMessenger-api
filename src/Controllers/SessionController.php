@@ -10,6 +10,7 @@ use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\ParametersException;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 
 class SessionController extends Controller
@@ -18,13 +19,12 @@ class SessionController extends Controller
 	private TokenService $tokenService;
 
 	/**
-	 * @throws ORMException
-	 * @throws Exception
+	 * @throws NotSupported
 	 */
 	public function __construct()
 	{
-		$this->sessionService = new SessionService(Database::getInstance());
-		$this->tokenService = new TokenService(Database::getInstance());
+		$this->sessionService = new SessionService(Database::getEntityManager());
+		$this->tokenService = new TokenService(Database::getEntityManager());
 		parent::__construct();
 	}
 

@@ -2,6 +2,7 @@
 
 namespace Api\Singleton;
 
+use Core\Singleton;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 

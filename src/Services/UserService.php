@@ -18,6 +18,10 @@ class UserService
 	private EntityRepository $entityRepository;
 	private EntityManager $entityManager;
 
+	/**
+	 * @param EntityManager $entityManager
+	 * @throws NotSupported
+	 */
 	public function __construct(EntityManager $entityManager)
 	{
 		$this->entityManager = $entityManager;
@@ -96,7 +100,7 @@ class UserService
 			time(),
 			$_SERVER['REMOTE_ADDR']);*/
 
-		return (new SessionService(Database::getInstance()))->createByAId($account->getId());
+		return (new SessionService(Database::getInstance()->getEntityManager()))->createByAId($account->getId());
 	}
 
 	/**

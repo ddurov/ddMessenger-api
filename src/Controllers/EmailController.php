@@ -9,21 +9,21 @@ use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
-use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use PHPMailer\PHPMailer\Exception;
 
 class EmailController extends Controller
 {
 	private EmailService $emailService;
 
 	/**
-	 * @throws \PHPMailer\PHPMailer\Exception
-	 * @throws ORMException
 	 * @throws Exception
+	 * @throws NotSupported
 	 */
 	public function __construct()
 	{
-		$this->emailService = new EmailService(Database::getInstance(), Mailer::getInstance());
+		$this->emailService = new EmailService(Database::getEntityManager(), Mailer::getInstance());
 		parent::__construct();
 	}
 
@@ -31,7 +31,7 @@ class EmailController extends Controller
 	 * @return void
 	 * @throws InternalError
 	 * @throws ORMException
-	 * @throws \PHPMailer\PHPMailer\Exception|ParametersException
+	 * @throws Exception|ParametersException
 	 */
 	public function createCode(): void
 	{
