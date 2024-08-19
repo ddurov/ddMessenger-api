@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -35,9 +36,10 @@ class EmailService
 	 * Возвращает хэш кода подтверждения
 	 * @param string $email
 	 * @return string
-	 * @throws ORMException
 	 * @throws Exception
 	 * @throws InternalError
+	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 */
 	public function createCode(string $email): string
 	{
@@ -88,7 +90,9 @@ class EmailService
 	 * @param string $hash
 	 * @param int $needRemove
 	 * @return bool
-	 * @throws ORMException|ParametersException
+	 * @throws ORMException
+	 * @throws ParametersException
+	 * @throws OptimisticLockException
 	 */
 	public function confirmCode(string $code, string $hash, int $needRemove = 0): bool
 	{

@@ -6,12 +6,13 @@ use Api\Models\TokenModel;
 use Api\Models\UserModel;
 use Api\Singleton\Database;
 use Core\Exceptions\EntityException;
+use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class UserService
 {
@@ -35,7 +36,9 @@ class UserService
 	 * @param string $username
 	 * @param string $email
 	 * @return int
-	 * @throws ORMException|EntityException
+	 * @throws EntityException
+	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 */
 	public function register(string $login, string $password, string $username, string $email): int
 	{
@@ -65,10 +68,12 @@ class UserService
 	 * @param string $login
 	 * @param string $password
 	 * @return string
-	 * @throws ORMException
 	 * @throws EntityException
+	 * @throws NotSupported
+	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 * @throws ParametersException
-	 * @throws Exception
+	 * @throws InternalError
 	 */
 	public function auth(string $login, string $password): string
 	{
@@ -100,7 +105,7 @@ class UserService
 			time(),
 			$_SERVER['REMOTE_ADDR']);*/
 
-		return (new SessionService(Database::getInstance()->getEntityManager()))->createByAId($account->getId());
+		return (new SessionService(Database::getEntityManager()))->createByAId($account->getId());
 	}
 
 	/**
@@ -110,6 +115,7 @@ class UserService
 	 * @param string $newPassword
 	 * @return void
 	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 */
 	public function resetPassword(string $login, string $newPassword): void
 	{
@@ -129,7 +135,9 @@ class UserService
 	 * @param string $newName
 	 * @param string $token
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws NotSupported
+	 * @throws ParametersException
 	 */
 	public function changeName(string $newName, string $token): void
 	{
@@ -147,7 +155,8 @@ class UserService
 	 * @param int|null $aId
 	 * @param string $token
 	 * @return array
-	 * @throws EntityException|NotSupported
+	 * @throws EntityException
+	 * @throws NotSupported
 	 */
 	public function get(?int $aId, string $token): array
 	{

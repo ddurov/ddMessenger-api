@@ -2,19 +2,16 @@
 
 namespace Api\Singleton;
 
+use Core\Exceptions\InternalError;
 use Core\Singleton;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
 
 class Database implements Singleton
 {
 	private static ?\Core\Database $database = null;
 
 	/**
-	 * @return \Core\Database
-	 * @throws Exception
-	 * @throws MissingMappingDriverImplementation
+	 * @throws InternalError
 	 */
 	public static function getInstance(): \Core\Database
 	{
@@ -32,10 +29,10 @@ class Database implements Singleton
 	}
 
 	/**
-	 * @return EntityManager
+	 * @throws InternalError
 	 */
 	public static function getEntityManager(): EntityManager
 	{
-	    return self::$database->getEntityManager();
+	    return self::getInstance()->getEntityManager();
 	}
 }

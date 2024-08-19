@@ -13,10 +13,9 @@ use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
 use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
-use Doctrine\DBAL\Exception;
-use Doctrine\ORM\Exception\MissingMappingDriverImplementation;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use PHPMailer\PHPMailer\Exception;
 
 class UserController extends Controller
 {
@@ -25,8 +24,9 @@ class UserController extends Controller
 	private TokenService $tokenService;
 
 	/**
+	 * @throws InternalError
 	 * @throws NotSupported
-	 * @throws \PHPMailer\PHPMailer\Exception
+	 * @throws Exception
 	 */
 	public function __construct()
 	{
@@ -39,8 +39,6 @@ class UserController extends Controller
 	/**
 	 * @return void
 	 * @throws EntityException
-	 * @throws MissingMappingDriverImplementation
-	 * @throws NotSupported
 	 * @throws ORMException
 	 * @throws ParametersException
 	 */
@@ -79,8 +77,8 @@ class UserController extends Controller
 
 	/**
 	 * @return void
-	 * @throws Exception
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ParametersException
 	 */
 	public function auth(): void
 	{
@@ -106,12 +104,11 @@ class UserController extends Controller
 	/**
 	 * @return void
 	 * @throws EntityException
+	 * @throws InternalError
+	 * @throws NotSupported
 	 * @throws ORMException
 	 * @throws ParametersException
-	 * @throws InternalError
-	 * @throws MissingMappingDriverImplementation
-	 * @throws NotSupported
-	 * @throws \PHPMailer\PHPMailer\Exception
+	 * @throws Exception
 	 */
 	public function resetPassword(): void
 	{
@@ -157,7 +154,9 @@ class UserController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ParametersException|EntityException|ORMException
+	 * @throws EntityException
+	 * @throws ORMException
+	 * @throws ParametersException
 	 */
 	public function changeName(): void
 	{
@@ -181,7 +180,9 @@ class UserController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws NotSupported
+	 * @throws ParametersException
 	 */
 	public function get(): void
 	{
@@ -202,7 +203,8 @@ class UserController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ParametersException
 	 */
 	public function search(): void
 	{

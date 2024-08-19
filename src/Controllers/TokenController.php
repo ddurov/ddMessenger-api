@@ -8,8 +8,8 @@ use Api\Singleton\Database;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
+use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 
@@ -20,6 +20,7 @@ class TokenController extends Controller
 
 	/**
 	 * @throws NotSupported
+	 * @throws InternalError
 	 */
 	public function __construct()
 	{
@@ -30,7 +31,9 @@ class TokenController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ORMException
+	 * @throws ParametersException
 	 */
 	public function create(): void
 	{
@@ -51,7 +54,9 @@ class TokenController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws NotSupported
+	 * @throws ParametersException
 	 */
 	public function get(): void
 	{
@@ -72,7 +77,8 @@ class TokenController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ParametersException
 	 */
 	public function check(): void
 	{

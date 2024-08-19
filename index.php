@@ -118,7 +118,7 @@ try {
 } catch (Throwable $exceptions) {
 
 	Other::log(
-		"/var/www/logs",
+		"logs",
 		"messenger",
 		"Error: " . $exceptions->getMessage() .
 		", on line: " . $exceptions->getLine() .

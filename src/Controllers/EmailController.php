@@ -18,8 +18,9 @@ class EmailController extends Controller
 	private EmailService $emailService;
 
 	/**
-	 * @throws Exception
+	 * @throws InternalError
 	 * @throws NotSupported
+	 * @throws Exception
 	 */
 	public function __construct()
 	{
@@ -29,9 +30,10 @@ class EmailController extends Controller
 
 	/**
 	 * @return void
+	 * @throws Exception
 	 * @throws InternalError
+	 * @throws ParametersException
 	 * @throws ORMException
-	 * @throws Exception|ParametersException
 	 */
 	public function createCode(): void
 	{
@@ -56,7 +58,8 @@ class EmailController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException
+	 * @throws ORMException
+	 * @throws ParametersException
 	 */
 	public function confirmCode(): void
 	{

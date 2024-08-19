@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\Parameter;
 
@@ -36,7 +37,11 @@ class MessageService
 	 * @param string $text
 	 * @param string $token
 	 * @return int
-	 * @throws ORMException|EntityException
+	 * @throws EntityException
+	 * @throws NonUniqueResultException
+	 * @throws NotSupported
+	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 */
 	public function send(int $aId, string $text, string $token): int
 	{
@@ -107,7 +112,9 @@ class MessageService
 	 * @param int|null $offset
 	 * @param string $token
 	 * @return array
-	 * @throws ORMException|EntityException
+	 * @throws EntityException
+	 * @throws NotSupported
+	 * @throws NonUniqueResultException
 	 */
 	public function getHistory(int $aId, ?int $offset, string $token): array
 	{
@@ -149,7 +156,8 @@ class MessageService
 	 * Возвращает список диалогов
 	 * @param string $token
 	 * @return array
-	 * @throws ORMException|EntityException
+	 * @throws EntityException
+	 * @throws NotSupported
 	 */
 	public function getDialogs(string $token): array
 	{
@@ -242,10 +250,6 @@ class MessageService
 		return $newArray;
 	}
 
-	/**
-	 * @param string $message
-	 * @return string
-	 */
 	public function encryptMessage(string $message): string
 	{
 		$iv = openssl_random_pseudo_bytes(
@@ -266,10 +270,6 @@ class MessageService
 		return base64_encode($iv . $hmac . $rawEncrypted);
 	}
 
-	/**
-	 * @param string $messageEncoded
-	 * @return string
-	 */
 	public static function decryptMessage(string $messageEncoded): string
 	{
 		$fullRawDecrypted = base64_decode($messageEncoded);

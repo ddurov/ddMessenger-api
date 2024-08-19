@@ -8,6 +8,7 @@ use Api\Singleton\Database;
 use Core\Controllers\Controller;
 use Core\DTO\SuccessResponse;
 use Core\Exceptions\EntityException;
+use Core\Exceptions\InternalError;
 use Core\Exceptions\ParametersException;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
@@ -19,6 +20,7 @@ class MessageController extends Controller
 	private TokenService $tokenService;
 
 	/**
+	 * @throws InternalError
 	 * @throws NotSupported
 	 */
 	public function __construct()
@@ -30,7 +32,9 @@ class MessageController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ParametersException
+	 * @throws ORMException
 	 */
 	public function send(): void
 	{
@@ -53,7 +57,9 @@ class MessageController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ORMException
+	 * @throws ParametersException
 	 */
 	public function getHistory(): void
 	{
@@ -75,7 +81,9 @@ class MessageController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ORMException|ParametersException|EntityException
+	 * @throws EntityException
+	 * @throws ORMException
+	 * @throws ParametersException
 	 */
 	public function getDialogs(): void
 	{
@@ -94,11 +102,11 @@ class MessageController extends Controller
 
 	/**
 	 * @return void
-	 * @throws ParametersException
+	 * @throws EntityException
 	 * @throws NotSupported
 	 * @throws ORMException
+	 * @throws ParametersException
 	 * @throws OptimisticLockException
-	 * @throws EntityException
 	 */
 	public function getUpdates(): void
 	{

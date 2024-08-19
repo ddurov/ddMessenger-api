@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class TokenService
 {
@@ -30,7 +31,9 @@ class TokenService
 	 * @param int $tokenType
 	 * @param string $sessionId
 	 * @return string
+	 * @throws NotSupported
 	 * @throws ORMException
+	 * @throws OptimisticLockException
 	 */
 	public function create(int $tokenType, string $sessionId): string
 	{

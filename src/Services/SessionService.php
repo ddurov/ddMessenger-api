@@ -30,6 +30,7 @@ class SessionService
 	 * Возвращает новую сессию
 	 * @param string $token
 	 * @return string
+	 * @throws NotSupported
 	 * @throws ORMException
 	 * @throws OptimisticLockException
 	 */
