@@ -4,4 +4,4 @@ logs/
 vendor/
 .idea/
 composer.lock
-.env
+.env*
