@@ -2,14 +2,13 @@ services:
   web:
     image: nginx:latest
     restart: unless-stopped
-    environment:
-      MAIN_HOST: messenger.api.${ROOT_HOST}
+    env_file:
+      - .env
     ports:
       - "80:80"
       - "443:443"
     links:
       - app
-      - db-admin
     depends_on:
       - app
     volumes:
@@ -17,7 +16,8 @@ services:
       - ./service/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service/certs/:/etc/nginx/ssl/:ro
   app:
-    build: .
+    image: ddprojects/messenger
+    hostname: messenger
     env_file:
       - .env
     links:

@@ -2,7 +2,7 @@ server {
 	listen 80;
 	listen 443 ssl;
 	http2 on;
-	server_name ${MAIN_HOST};
+	server_name ${MESSENGER_HOST};
 	root /var/www/html/;
 
 	if ($scheme = http) {
@@ -18,7 +18,7 @@ server {
 
 	location ~* \.php$ {
 		fastcgi_split_path_info ^(.+\.php)(/.+)$;
-		fastcgi_pass app:9000;
+		fastcgi_pass messenger:9000;
 		fastcgi_index index.php;
 		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 		include fastcgi_params;
